@@ -1,0 +1,47 @@
+/*
+ * site.css — single-owner site overrides, loaded last.
+ * Layout and visibility only (no colours), so the light / mint / dark themes
+ * are untouched. !important is deliberate: app.js toggles the `hidden`
+ * attribute on several of these and would otherwise win.
+ */
+
+/* There is no Google sign-in, shared demo or admin on this site. */
+#auth-panel,
+#demo-edit-bar,
+#auth-login-button,
+#auth-admin-link {
+  display: none !important;
+}
+
+/* ── Visitor chrome (body.is-authenticated is set by app.js syncAuthUi) ── */
+body:not(.is-authenticated) #auth-controls,
+body:not(.is-authenticated) #mobile-quick-add-btn,
+body:not(.is-authenticated) #mobile-quick-add-panel,
+body:not(.is-authenticated) [data-nav-page="bin"],
+body:not(.is-authenticated) #floating-bulk-actions-bar,
+body:not(.is-authenticated) #profile-floating-bulk-actions-bar {
+  display: none !important;
+}
+
+/* Keep the grid track (hero is `auto 1fr auto` on desktop) but show nothing. */
+body:not(.is-authenticated) #hero-topbar-search {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Four buttons once the [+] is gone. */
+body:not(.is-authenticated) .mobile-nav-inner {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Owner-only affordances on public profile cards. profile.js already skips
+   them for visitors; these rules are the backstop. */
+.profile-page.is-public .paper-refresh-link,
+.profile-page.is-public .paper-extra-links-add-row,
+.profile-page.is-public .paper-extra-link-add,
+.profile-page.is-public .paper-extra-link-remove,
+.profile-page.is-public .paper-private-lock,
+.profile-page.is-public .paper-meta .paper-edit,
+.profile-page.is-public .paper-meta .paper-delete {
+  display: none !important;
+}

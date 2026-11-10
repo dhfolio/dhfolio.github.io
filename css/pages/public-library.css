@@ -1,0 +1,168 @@
+/* ── Public library (visitor view at /<slug>/library) ──────────────────────── */
+
+/* Hidden unless the route activates public-library mode. The body class also
+   hides every owner Library panel and the sign-in banner (mirrors the
+   body.is-page-profile auth-panel rule in profile.css). */
+#public-library { display: none; }
+
+/* #app-main is a 12-column grid — span all of it like the owner panels do. */
+body.is-public-library #public-library { display: block; grid-column: 1 / -1; min-width: 0; }
+body.is-public-library #app-main > .panel { display: none; }
+body.is-public-library .panel.auth-panel { display: none; }
+
+.plib-page,
+.plib-page * { font-family: "Roboto", "Segoe UI", Arial, sans-serif; }
+
+.plib-page { padding: 0 0 40px; }
+
+.plib-header { margin-bottom: 14px; }
+.plib-page-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plib-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--chip);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.plib-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.plib-subtitle a { color: var(--accent); text-decoration: none; }
+.plib-subtitle a:hover { text-decoration: underline; }
+
+/* Controls */
+.plib-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.plib-search-wrap { flex: 1 1 240px; min-width: 180px; }
+.plib-search {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: var(--panel);
+  color: var(--text);
+}
+.plib-search:focus { outline: 2px solid var(--accent); border-color: transparent; }
+.plib-controls select {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: var(--panel);
+  color: var(--text);
+  max-width: 46vw;
+}
+
+/* Card grid — mirrors the Bin page breakpoints */
+.plib-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+@media (min-width: 900px) {
+  .plib-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+}
+@media (min-width: 1400px) {
+  .plib-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.plib-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  min-width: 0;
+}
+.plib-topline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.plib-sep { color: var(--muted); opacity: 0.6; margin: 0 4px; }
+.plib-title {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.plib-authors {
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.plib-summary {
+  margin: 0 0 8px;
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  cursor: pointer;
+}
+.plib-summary.is-clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.plib-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.78rem;
+}
+.plib-foot a { color: var(--accent); text-decoration: none; }
+.plib-foot a:hover { text-decoration: underline; }
+.plib-tags { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.plib-tag-chip {
+  border: 1px solid var(--line);
+  background: var(--chip);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+.plib-tag-chip:hover { color: var(--text); }
+
+/* Empty / status states */
+.plib-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--muted);
+}
+.plib-empty-title { font-size: 0.95rem; font-weight: 600; margin: 0 0 6px; }
+.plib-empty-desc { font-size: 0.85rem; margin: 0; }
+
+/* Nav Bin entries are hidden for signed-out visitors via [hidden] in app.js —
+   make sure no display rule overrides it. */
+[data-nav-page="bin"][hidden] { display: none !important; }

@@ -1,0 +1,444 @@
+/* ── Navigation ─────────────────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESKTOP SIDEBAR  (≥ 701px) – fixed, below topbar, nav items only
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sidebar { display: none; }
+.sidebar-overlay { display: none; }
+
+/* Large desktop (≥1101px): sidebar always visible */
+@media (min-width: 1101px) {
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: var(--topbar-h);
+    left: var(--page-side);
+    bottom: 0;
+    width: var(--sidebar-w);
+    overflow-y: auto;
+    background: transparent;
+    padding: 12px 8px;
+    z-index: 200;
+    scrollbar-width: none;
+    border-right: none;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+}
+
+/* Small desktop (701-1100px): floating sidebar toggled via button */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: var(--topbar-h);
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-w);
+    overflow-y: auto;
+    background: var(--panel);
+    padding: 12px 8px;
+    z-index: 450;
+    scrollbar-width: none;
+    border-right: 1px solid var(--line);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+  .sidebar-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Sidebar nav items */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 6px;
+  background: var(--panel);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 10px 10px;
+  /* ── Issue #3: same font as mobile nav ── */
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.005em;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.15s, background 0.15s;
+  transform: none;
+  white-space: nowrap;
+}
+.sidebar-nav-item:hover { color: var(--text); background: var(--chip); transform: none; }
+.sidebar-nav-item.is-active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, var(--panel));
+  font-weight: 600;
+}
+.sidebar-nav-item.is-disabled { opacity: 0.35; pointer-events: none; cursor: default; }
+
+.sidebar-nav-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SHARED: SVG icon masks (sidebar + mobile)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mobile-nav-btn-icon {
+  display: inline-block;
+  background: currentColor;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+}
+
+[data-nav-page="library"] .sidebar-nav-icon,
+[data-nav-page="library"] .mobile-nav-btn-icon {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3L2 9h2v8H2v2h20v-2h-2V9h2L12 3zm-5 6h2v8H7V9zm4 0h2v8h-2V9zm4 0h2v8h-2V9z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3L2 9h2v8H2v2h20v-2h-2V9h2L12 3zm-5 6h2v8H7V9zm4 0h2v8h-2V9zm4 0h2v8h-2V9z'/%3E%3C/svg%3E");
+}
+[data-nav-page="news"] .sidebar-nav-icon,
+[data-nav-page="news"] .mobile-nav-btn-icon {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 4h13a1 1 0 0 1 1 1v13a2 2 0 0 0 2 2H5a1 1 0 0 1-1-1V4zm2 3v5h5V7H6zm7 0v1.5h3V7h-3zm0 3v1.5h3V10h-3zM6 14v1.5h10V14H6zm0 3v1.5h10V17H6zm14-8h1v9a1 1 0 0 1-2 0V9h1z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 4h13a1 1 0 0 1 1 1v13a2 2 0 0 0 2 2H5a1 1 0 0 1-1-1V4zm2 3v5h5V7H6zm7 0v1.5h3V7h-3zm0 3v1.5h3V10h-3zM6 14v1.5h10V14H6zm0 3v1.5h10V17H6zm14-8h1v9a1 1 0 0 1-2 0V9h1z'/%3E%3C/svg%3E");
+}
+[data-nav-page="profile"] .sidebar-nav-icon,
+[data-nav-page="profile"] .mobile-nav-btn-icon {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/%3E%3C/svg%3E");
+}
+[data-nav-page="bin"] .sidebar-nav-icon,
+[data-nav-page="bin"] .mobile-nav-btn-icon {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3h6l1 2H8zm-5 3h16l-1.5 15H5.5zm4 3v9h1.5V9zm3.25 0v9h1.5V9zm3.25 0v9H16V9z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3h6l1 2H8zm-5 3h16l-1.5 15H5.5zm4 3v9h1.5V9zm3.25 0v9h1.5V9zm3.25 0v9H16V9z'/%3E%3C/svg%3E");
+}
+[data-nav-page="maps"] .sidebar-nav-icon,
+[data-nav-page="maps"] .mobile-nav-btn-icon {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 8 8 8 8 0 0 1-8 8 8 8 0 0 1-8-8 8 8 0 0 1 8-8z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3Cpath d='M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zm0 2a8 8 0 0 1 8 8 8 8 0 0 1-8 8 8 8 0 0 1-8-8 8 8 0 0 1 8-8z'/%3E%3C/svg%3E");
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE bottom nav bar  (≤ 700px)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 200;
+  transition: transform 0.22s ease;
+  will-change: transform;
+}
+.mobile-nav.is-hidden { transform: translateY(100%); }
+
+.mobile-nav-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr 62px 1fr 1fr;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+
+.mobile-nav-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 100%;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.60rem;
+  font-weight: 500;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: color 0.15s;
+  transform: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-nav-btn:hover,
+.mobile-nav-btn:active { transform: none; color: var(--text); }
+.mobile-nav-btn.is-active { color: var(--accent); font-weight: 600; }
+.mobile-nav-btn.is-active::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+}
+.mobile-nav-btn.is-disabled { opacity: 0.35; pointer-events: none; }
+
+/* Centre + button */
+.mobile-nav-plus-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.5rem;
+  line-height: 1;
+  font-family: inherit;
+  border: none;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transform: none;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+.mobile-nav-plus-btn:hover,
+.mobile-nav-plus-btn:active { transform: none; background: var(--accent-dark); }
+
+
+/* ── Quick-add panel ──────────────────────────────────────────────────────── */
+/* translateY(100%) alone doesn't fully hide the panel at bottom: 60px.
+   Adding the nav bar height (60px) ensures it's fully off-screen. */
+.mobile-quick-add-panel {
+  position: fixed;
+  bottom: 60px;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  padding: 10px 12px;
+  z-index: 199;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.10);
+  transform: translateY(calc(100% + 60px));
+  transition: transform 0.22s ease;
+}
+.mobile-quick-add-panel.is-open { transform: translateY(0); }
+
+.mobile-quick-add-row { display: flex; gap: 6px; align-items: center; }
+.mobile-quick-add-input-wrap { position: relative; flex: 1; min-width: 0; display: flex; }
+.mobile-quick-add-input-wrap .mobile-quick-add-input { flex: 1; }
+.mobile-quick-add-input {
+  flex: 1;
+  height: 36px;
+  padding: 0 28px 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  font-size: 0.87rem;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  background: var(--panel);
+  color: var(--text);
+  min-width: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: outline 0.12s, box-shadow 0.12s;
+}
+.mobile-quick-add-input:focus {
+  outline: 2px solid var(--accent);
+  border-color: transparent;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.20);
+}
+.mobile-quick-add-input::placeholder { color: var(--muted); opacity: 0.7; }
+.mobile-quick-add-fetch {
+  height: 36px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transform: none;
+}
+.mobile-quick-add-fetch:hover { background: var(--chip); transform: none; }
+.mobile-quick-add-submit {
+  height: 36px;
+  padding: 0 13px;
+  border: none;
+  border-radius: 18px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  transform: none;
+  letter-spacing: 0.01em;
+}
+.mobile-quick-add-submit:hover { transform: none; background: var(--accent-dark); }
+
+/* ── Mobile button shimmer loading ─────────────────────────────────────────── */
+@keyframes btn-shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.mobile-quick-add-fetch.is-loading {
+  pointer-events: none;
+  color: var(--muted);
+  background: linear-gradient(
+    110deg, var(--panel) 35%,
+    color-mix(in srgb, var(--accent) 22%, var(--panel)) 50%,
+    var(--panel) 65%
+  );
+  background-size: 200% 100%;
+  animation: btn-shimmer 1.6s ease-in-out infinite;
+}
+.mobile-quick-add-submit.is-loading {
+  pointer-events: none;
+  background: linear-gradient(
+    110deg, var(--accent) 35%,
+    color-mix(in srgb, #fff 28%, var(--accent)) 50%,
+    var(--accent) 65%
+  );
+  background-size: 200% 100%;
+  animation: btn-shimmer 1.6s ease-in-out infinite;
+}
+
+/* ── Mobile breakpoint toggle ─────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .mobile-nav { display: flex; }
+  .app-shell { padding-bottom: 72px; }
+
+  /* Slide-in sidebar drawer (toggled via brand mark) */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 240px;
+    overflow-y: auto;
+    background: var(--panel);
+    padding: 16px 10px;
+    z-index: 450;
+    scrollbar-width: none;
+    border-right: 1px solid var(--line);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18);
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+  }
+  .sidebar::-webkit-scrollbar { display: none; }
+  .sidebar.is-open { transform: translateX(0); }
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+  .sidebar-overlay.is-visible { opacity: 1; pointer-events: auto; }
+}
+
+/* ── Shared X clear button for URL/DOI inputs ────────────────────────────── */
+.input-clear-x {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.input-clear-x:hover { opacity: 0.9; color: var(--text); background: none; transform: translateY(-50%); }
+.input-clear-x.is-hidden { display: none; }
+
+/* ── Dark / mint tweaks ───────────────────────────────────────────────────── */
+body.dark-mode .mobile-nav { box-shadow: none; }
+body.dark-mode .mobile-nav-plus-btn { box-shadow: 0 3px 14px rgba(0,0,0,0.45); }
+body.dark-mode .mobile-nav-plus-btn,
+body.dark-mode .mobile-nav-plus-btn:hover { color: var(--bg); }
+body.dark-mode .mobile-quick-add-panel { box-shadow: 0 -6px 28px rgba(0,0,0,0.4); }
+body.dark-mode .mobile-quick-add-submit,
+body.dark-mode .mobile-quick-add-submit:hover { color: var(--bg); }
+body.dark-mode .sidebar-nav { box-shadow: 0 4px 20px rgba(0,0,0,0.45); }

@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Routes are up to two segments deep (/<slug>/news), so the relative
+       "./css/…" asset URLs below must resolve against the site root, not
+       against /<slug>/. -->
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Duk-Hyun Choe</title>
+  <meta name="description" content="Publications, talks, news, reading library and citation map of Duk-Hyun Choe.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Duk-Hyun Choe">
+  <meta property="og:description" content="Publications, talks, news, reading library and citation map.">
+  <meta property="og:url" content="https://dhfolio.github.io/">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=1.0.0">
+  <link rel="apple-touch-icon" href="./favicon-app.svg?v=1.0.0">
+  <link rel="manifest" href="./manifest.webmanifest?v=1.0.0">
+  <meta name="theme-color" content="#1c1d20">
+  <link rel="stylesheet" href="./css/fonts.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/base.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/layout.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/layout-chrome.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/auth.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/components.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/richtext.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/admin.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/navigation.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/pages/library.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/pages/public-library.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/pages/bin.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/pages/profile.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/pages/achievements.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/pages/news.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/pages/maps.css?v=1.0.0">
+  <link rel="stylesheet" href="./css/site.css?v=1.0.0">
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- Desktop sidebar (nav only — brand & search live in topbar) -->
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        <button class="sidebar-nav-item is-active" type="button" data-nav-page="profile" aria-current="page">
+          <span class="sidebar-nav-icon" aria-hidden="true"></span>Profile
+        </button>
+        <button class="sidebar-nav-item" type="button" data-nav-page="news" aria-current="false">
+          <span class="sidebar-nav-icon" aria-hidden="true"></span>News
+        </button>
+        <button class="sidebar-nav-item" type="button" data-nav-page="library" aria-current="false">
+          <span class="sidebar-nav-icon" aria-hidden="true"></span>Library
+        </button>
+        <button class="sidebar-nav-item" type="button" data-nav-page="maps" aria-current="false">
+          <span class="sidebar-nav-icon" aria-hidden="true"></span>Maps
+        </button>
+        <button class="sidebar-nav-item" type="button" data-nav-page="bin" aria-current="false">
+          <span class="sidebar-nav-icon" aria-hidden="true"></span>Bin
+        </button>
+      </nav>
+    </aside>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- ===== Main content area ===== -->
+    <!-- Demo edit toolbar — visible only when ?demoEdit=1 is active (admin only) -->
+    <div id="demo-edit-bar" class="demo-edit-bar" hidden>
+      <span class="demo-edit-label">⚠️ EDITING DEMO — changes download on Save</span>
+      <div class="demo-edit-actions">
+        <button id="demo-edit-save" class="demo-edit-btn demo-edit-save-btn" type="button">💾 Save demo-seed-data.js</button>
+        <button id="demo-edit-reset" class="secondary demo-edit-btn" type="button">Reset</button>
+        <a class="secondary demo-edit-btn">Back to admin</a>
+      </div>
+    </div>
+
+    <div class="content-wrap">
+      <!--
+        The hero doubles as the fixed topbar on desktop.
+        On desktop: fixed bar with brand (left) + URL/DOI search (center) + auth (right).
+        On mobile:  normal page header with title + tagline + auth.
+      -->
+      <header class="hero">
+        <!-- Brand: title only (left section on desktop / full title on mobile) -->
+        <div class="hero-brand">
+          <button id="sidebar-toggle" class="hero-brand-mark" type="button" aria-label="Toggle sidebar" title="Toggle sidebar">
+            <svg viewBox="0 0 64 64" fill="none" width="100%" height="100%" aria-hidden="true">
+              <g stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.7">
+                <path d="M16 18 L48 22"/>
+                <path d="M16 18 L24 50"/>
+                <path d="M48 22 L24 50"/>
+              </g>
+              <circle cx="16" cy="18" r="6" fill="currentColor"/>
+              <circle cx="48" cy="22" r="8" fill="currentColor"/>
+              <circle cx="24" cy="50" r="5" fill="currentColor"/>
+              <path d="M51.04535909296246 36.05217550226929 L52.482306099768984 42.39395716250308 L58.97931175578873 42.78076569420244 L53.62290410288322 46.452815484910634 L55.795128762349396 52.582180499844585 L50.4485301625761 49.06195276373493 L44.794389751069835 52.21164091611588 L46.49641034555569 46.13816872470541 L41.40948907091478 42.34843817810112 L47.93195316008275 42.10860115822796 Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <div class="hero-brand-text">
+            <h1 id="sidebar-toggle-text" class="hero-brand-title" role="button" tabindex="0" aria-label="Toggle sidebar">Research Atlas</h1>
+            <p class="hero-copy">Scattered papers into a living research atlas.</p>
+          </div>
+        </div>
+
+        <!-- Topbar search: URL / DOI input — desktop only -->
+        <div class="hero-topbar-search" id="hero-topbar-search">
+          <div class="topbar-input-wrap">
+            <input class="topbar-input" id="topbar-input" type="text"
+              placeholder="URL or DOI"
+              autocorrect="off" autocapitalize="none" autocomplete="off">
+            <button id="topbar-input-clear" class="input-clear-x is-hidden" type="button" aria-label="Clear" title="Clear">✕</button>
+          </div>
+          <button class="topbar-fetch-btn" id="topbar-fetch-btn" type="button">Fetch</button>
+          <button class="topbar-add-btn" id="topbar-add-btn" type="button">⚡Add</button>
+        </div>
+
+        <!-- Auth + theme toggle (always present, right side) -->
+        <div class="hero-actions">
+          <div id="auth-controls" class="auth-controls" hidden>
+            <button id="auth-login-button" class="secondary auth-button" type="button">Sign in</button>
+            <a id="auth-admin-link" class="secondary auth-button auth-admin-link" hidden>Admin</a>
+            <div id="auth-user-badge" class="auth-user-badge" hidden>
+              <span id="auth-user-name" class="auth-user-name"></span>
+              <span class="auth-user-divider" aria-hidden="true">|</span>
+              <button id="auth-logout-button" class="secondary subtle-action auth-logout-button" type="button" aria-label="Log out" title="Log out"></button>
+              <div id="auth-user-popover" class="auth-user-popover" aria-live="polite">
+                <p id="auth-user-popover-name" class="auth-user-popover-name"></p>
+                <p id="auth-user-popover-email" class="auth-user-popover-email"></p>
+              </div>
+            </div>
+          </div>
+          <button id="theme-toggle-button" class="theme-toggle" type="button" aria-label="Cycle theme" title="Cycle theme"></button>
+        </div>
+      </header>
+
+      <section id="auth-panel" class="panel auth-panel" hidden>
+        <div class="auth-panel-copy">
+          <p id="auth-panel-lead" class="auth-panel-lead">Try the demo below, then sign in with Google to build and share your own living research atlas!</p>
+        </div>
+        <div class="auth-panel-actions">
+          <button id="auth-panel-login-button" class="auth-google-asset-button" type="button" aria-label="Continue with Google">
+          </button>
+        </div>
+        <p id="auth-status" class="muted auth-status" aria-live="polite"></p>
+      </section>
+
+      <div id="floating-bulk-actions-bar" class="floating-bulk-actions-bar" hidden>
+        <span id="floating-bulk-selection-count" class="muted">0 selected</span>
+        <div class="bulk-actions">
+          <button class="secondary subtle-action" type="button" data-bulk-action="clear">Clear selection</button>
+          <button class="secondary" type="button" data-bulk-action="unread">Mark unread</button>
+          <button class="secondary" type="button" data-bulk-action="read">Mark read</button>
+          <button class="secondary" type="button" data-bulk-action="refresh">Update metadata</button>
+          <button class="secondary danger-action" type="button" data-bulk-action="delete">Delete selected</button>
+        </div>
+      </div>
+
+      <div id="profile-floating-bulk-actions-bar" class="floating-bulk-actions-bar" hidden>
+        <span id="profile-floating-bulk-selection-count" class="muted">0 selected</span>
+        <div class="bulk-actions">
+          <button class="secondary subtle-action" type="button" data-profile-bulk-action="clear">Clear selection</button>
+          <button class="secondary subtle-action" type="button" data-profile-bulk-action="select-all">Select all</button>
+          <button class="secondary" type="button" data-profile-bulk-action="show-on-profile">Show on profile</button>
+          <button class="secondary" type="button" data-profile-bulk-action="hide-from-profile">Hide from profile</button>
+          <button class="secondary" type="button" data-profile-bulk-action="refresh">Update metadata</button>
+          <button class="secondary danger-action" type="button" data-profile-bulk-action="delete">Delete</button>
+        </div>
+      </div>
+
+      <main id="app-main" class="grid" data-page="library" hidden>
+        <!-- Read-only visitor library (/<slug>/library) — shown via body.is-public-library,
+             which also hides the owner panels below. Rendered by js/pages/public-library.js. -->
+        <section id="public-library" aria-label="Public library"></section>
+
+        <section class="panel stats-panel">
+          <div class="stats">
+            <button class="stat-card stat-card-action" type="button" data-stat-filter="papers"><strong id="stat-papers">0</strong><span class="stat-label">items</span></button>
+            <button class="stat-card stat-card-action" type="button" data-stat-filter="unread"><strong id="stat-unread">0</strong><span class="stat-label">unread</span></button>
+            <button class="stat-card stat-card-action" type="button" data-stat-filter="favorites"><strong id="stat-favorites">0</strong><span class="stat-label">favorites</span></button>
+            <button class="stat-card stat-card-action" type="button" data-stat-filter="tags"><strong id="stat-tags">0</strong><span class="stat-label">tags</span></button>
+            <button id="stats-add-manually-btn" class="stat-add-manually-btn" type="button" data-panel-toggle="import">+ Add manually</button>
+          </div>
+        </section>
+
+        <section class="panel import-panel collapsible-panel is-collapsed" data-panel="import" hidden>
+          <div class="panel-header import-panel-header">
+            <h2>Add manually</h2>
+          </div>
+          <div class="panel-body">
+            <div class="import-grid">
+              <form id="manual-form" class="card manual-card">
+                <input type="hidden" name="editing_id" id="editing-id">
+                <div class="manual-lookup-row" hidden>
+                  <label class="manual-lookup-input-wrap">
+                    <input name="lookup" id="lookup-input" placeholder="URL or DOI · https://... / 10.xxxx/...">
+                    <button id="clear-lookup-button" class="library-search-clear subtle-action is-hidden" type="button" aria-label="Clear lookup" title="Clear lookup">✕</button>
+                  </label>
+                  <button id="lookup-button" class="secondary lookup-action-button" type="button">Fetch</button>
+                  <button id="quick-add-button" class="secondary lookup-action-button" type="button">Quick Add</button>
+                  <p id="lookup-status" class="muted" aria-live="polite"></p>
+                </div>
+                <label>Title<input name="title" required></label>
+                <label>Authors<input name="authors" placeholder="Comma separated"></label>
+                <label>Affiliations<input name="affiliations" placeholder="Comma separated affiliations"></label>
+                <label>Publication date<input name="year" inputmode="numeric" placeholder="2026 or 2026/03 or 2026/03/29"></label>
+                <label>Journal<input name="journal"></label>
+                <label>Type
+                  <select name="type">
+                    <option value="paper">paper</option>
+                    <option value="review">review</option>
+                    <option value="article">article</option>
+                    <option value="lecture">lecture</option>
+                    <option value="thesis">thesis</option>
+                    <option value="other">other</option>
+                  </select>
+                </label>
+                <div class="manual-fetch-row">
+                  <label>DOI<input id="manual-doi-input" name="doi" placeholder="10.xxxx/..."></label>
+                  <button type="button" id="manual-doi-fetch" class="secondary manual-field-fetch" title="Fetch metadata from DOI">Fetch</button>
+                </div>
+                <div class="manual-fetch-row">
+                  <label>URL<input id="manual-url-input" name="url" type="url" placeholder="https://..."></label>
+                  <button type="button" id="manual-url-fetch" class="secondary manual-field-fetch" title="Fetch metadata from URL">Fetch</button>
+                </div>
+                <div class="manual-side-stack">
+                  <div class="pdf-path-group">
+                    <label>Local PDF path<input name="pdf_path" placeholder="C:\...\paper.pdf or ..\paper.pdf"></label>
+                    <div class="pdf-path-actions">
+                      <input id="manual-pdf-picker" type="file" accept=".pdf" hidden>
+                      <button id="manual-pdf-picker-button" class="secondary" type="button">Choose PDF</button>
+                    </div>
+                  </div>
+                  <div class="manual-tag-block">
+                    <label>Tags
+                      <select id="manual-tag-select">
+                        <option value="">Select tag</option>
+                      </select>
+                    </label>
+                    <div class="manual-inline-actions">
+                      <input id="manual-tag-new-input" placeholder="New tag">
+                      <button id="manual-tag-add-button" class="secondary" type="button">Add new</button>
+                    </div>
+                    <div id="manual-tag-list" class="chip-row compact"></div>
+                  </div>
+                </div>
+                <label class="manual-note-field">Notes<textarea name="notes" rows="6" placeholder="Add your takeaway, caveat, or why this paper matters."></textarea><span class="note-char-count" aria-live="polite"></span></label>
+                <label>Status
+                  <select name="status">
+                    <option value="unread">unread</option>
+                    <option value="read">read</option>
+                  </select>
+                </label>
+
+                <label>Source name<input name="source_name" placeholder="paper list, article list, manual form"></label>
+                <label class="manual-summary-field">Summary<textarea name="summary" rows="6"></textarea></label>
+                <article id="lookup-preview" class="metadata-preview" hidden>
+                  <strong>Metadata preview</strong>
+                  <p id="lookup-preview-text" class="muted"></p>
+                </article>
+                <div class="manual-actions">
+                  <button id="manual-submit-button" class="primary" type="submit">Add paper</button>
+                  <button id="manual-clear-button" class="secondary" type="button">Clear entry</button>
+                  <button id="manual-cancel-button" class="secondary" type="button" hidden>Cancel edit</button>
+                  <button class="secondary subtle-action panel-toggle panel-toggle-chevron manual-mobile-collapse" type="button" data-panel-toggle="import" aria-expanded="true" aria-label="Collapse new entry" title="Collapse new entry"></button>
+                </div>
+                <p id="manual-save-status" class="muted"></p>
+              </form>
+
+              <div class="import-cards-grid">
+                <div class="card import-card">
+                  <div class="import-card-head">
+                    <h3>Import URL list</h3>
+                    <span class="hint" title="Accepts a .txt file with one paper link per line.">?</span>
+                  </div>
+                  <input id="url-file-input" type="file" accept=".txt">
+                  <button id="import-url-button" class="secondary" type="button">Import text file</button>
+                </div>
+
+                <div class="card import-card">
+                  <div class="import-card-head">
+                    <h3>Import master CSV</h3>
+                    <span class="hint" title="Use the same CSV file you edit in Excel as your master database.">?</span>
+                  </div>
+                  <input id="csv-file-input" type="file" accept=".csv">
+                  <button id="import-csv-button" class="secondary" type="button">Import CSV</button>
+                </div>
+
+                <div class="card import-card">
+                  <div class="import-card-head">
+                    <h3>Import PDF folder</h3>
+                    <span class="hint" title="Pick PDFs or a folder. Filenames are used as paper titles for now.">?</span>
+                  </div>
+                  <input id="pdf-input" type="file" accept=".pdf" multiple webkitdirectory directory>
+                  <button id="import-pdf-button" class="secondary" type="button">Import selected PDFs</button>
+                  <p id="pdf-import-status" class="muted"></p>
+                </div>
+              </div>
+
+              <section id="duplicate-review" class="card duplicate-review" hidden>
+                <div class="panel-header">
+                  <h3>Import duplicate review</h3>
+                  <div class="inline-form">
+                    <select id="duplicate-default-mode">
+                      <option value="fill_blanks" selected>Fill blanks only (safe)</option>
+                      <option value="override">Override existing</option>
+                      <option value="keep_existing">Keep existing</option>
+                    </select>
+                    <button id="duplicate-apply-default" class="secondary" type="button">Apply to all</button>
+                  </div>
+                </div>
+                <p id="duplicate-review-summary" class="muted"></p>
+                <div id="duplicate-review-list" class="duplicate-review-list"></div>
+                <div class="manual-actions">
+                  <button id="duplicate-import-confirm" class="primary" type="button">Process import</button>
+                  <button id="duplicate-import-cancel" class="secondary" type="button">Cancel import</button>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel library-panel">
+          <div class="panel-header">
+            <h2>Catalog</h2>
+            <div class="filters">
+              <button id="select-visible-button" class="secondary subtle-action" type="button">Select all</button>
+              <button id="expand-all-button" class="secondary" type="button">Expand all</button>
+              <button id="collapse-all-button" class="secondary" type="button">Collapse all</button>
+            </div>
+          </div>
+          <div class="library-search">
+            <input id="search-input" placeholder="Search title, author, journal, summary, note">
+            <button id="clear-search-button" class="library-search-clear subtle-action" type="button" aria-label="Clear search" title="Clear search">✕</button>
+          </div>
+          <div class="library-toolbar library-mobile-section" data-library-section="controls">
+            <div class="library-section-header library-toolbar-header">
+              <div class="library-toolbar-summary-row">
+                <div class="library-section-heading">
+                  <span class="library-control-label">Filter</span>
+                  <span id="filter-mobile-summary" class="library-section-summary muted">All tags, All types, All</span>
+                </div>
+                <div class="library-section-heading">
+                  <span class="library-control-label">Sort</span>
+                  <span id="sort-mobile-summary" class="library-section-summary muted">Added date, Desc</span>
+                </div>
+              </div>
+              <button class="secondary subtle-action library-section-toggle" type="button" data-library-section-toggle="controls" aria-expanded="true">Hide</button>
+            </div>
+            <div class="library-section-body">
+              <div class="library-control-groups">
+                <div class="library-control-group">
+                  <span class="library-control-label">Filter</span>
+                  <div class="library-control-row">
+                    <select id="filter-tag"><option value="">All tags</option></select>
+                    <select id="filter-type">
+                      <option value="">All types</option>
+                      <option value="paper">paper</option>
+                      <option value="review">review</option>
+                      <option value="article">article</option>
+                      <option value="lecture">lecture</option>
+                      <option value="thesis">thesis</option>
+                      <option value="other">other</option>
+                    </select>
+                    <div class="filter-status-row">
+                      <div id="filter-status-control" class="segmented-control" role="tablist" aria-label="Status filter">
+                        <button class="segmented-control-button is-active" type="button" data-value="">All</button>
+                        <button class="segmented-control-button" type="button" data-value="unread">Unread</button>
+                        <button class="segmented-control-button" type="button" data-value="read">Read</button>
+                      </div>
+                      <button id="filter-favorites-toggle" class="favorite-filter-button" type="button" aria-pressed="false" title="Show favorites only"></button>
+                    </div>
+                    <input id="filter-status" type="hidden" value="">
+                    <input id="filter-favorites" type="hidden" value="">
+                  </div>
+                </div>
+                <div class="library-control-group">
+                  <span class="library-control-label">Sort</span>
+                  <div class="library-control-row">
+                    <select id="sort-field">
+                      <option value="addedAt">Added date</option>
+                      <option value="updatedAt">Updated date</option>
+                      <option value="year">Publication date</option>
+                      <option value="title">Title</option>
+                    </select>
+                    <select id="sort-direction">
+                      <option value="desc">Descending</option>
+                      <option value="asc">Ascending</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="search-scope" aria-label="Search scope">
+            <div class="search-scope-options">
+              <label class="search-scope-all"><input type="checkbox" class="search-scope-toggle-all" checked> All</label>
+              <label><input type="checkbox" class="search-scope-toggle" value="title" checked> Title</label>
+              <label><input type="checkbox" class="search-scope-toggle" value="authors" checked> Author</label>
+              <label><input type="checkbox" class="search-scope-toggle" value="journal" checked> Journal</label>
+              <label><input type="checkbox" class="search-scope-toggle" value="affiliations" checked> Affiliation</label>
+              <label><input type="checkbox" class="search-scope-toggle" value="summary" checked> Summary</label>
+              <label><input type="checkbox" class="search-scope-toggle" value="notes" checked> Note</label>
+            </div>
+          </div>
+          <div id="paper-list" class="paper-list"></div>
+        </section>
+
+        <section class="panel tag-panel">
+          <div class="panel-header">
+            <h2>Tags</h2>
+            <form id="tag-form" class="inline-form">
+              <input id="tag-input" placeholder="Add tag" required>
+              <button class="secondary" type="submit">Add</button>
+            </form>
+          </div>
+          <div id="tag-list" class="chip-row"></div>
+        </section>
+
+        <section class="panel library-bin-panel">
+          <button type="button" class="library-bin-link" data-nav-page="bin">
+            <span class="library-bin-link-icon" aria-hidden="true"></span>
+            <span class="library-bin-link-label">Bin</span>
+          </button>
+        </section>
+
+        <section class="panel insights-panel collapsible-panel is-collapsed" data-panel="insights" hidden>
+          <div class="panel-header">
+            <h2>Insight draft (experimental)</h2>
+            <div class="panel-header-actions">
+              <button id="generate-report-button" class="primary" type="button">Generate report</button>
+              <button class="secondary panel-toggle" type="button" data-panel-toggle="insights" aria-expanded="false">Expand</button>
+            </div>
+          </div>
+          <div class="panel-body">
+          <div class="report-controls">
+            <form id="profile-form" class="card report-profile-card">
+              <label>Research profile<textarea id="profile-notes" rows="5" placeholder="What topics matter to you, what are you trying to build or write, and what should this app optimize for?"></textarea></label>
+              <div class="manual-actions">
+                <button class="secondary" type="submit">Save profile</button>
+              </div>
+            </form>
+            <label>Report title<input id="report-title" value="Biweekly paper review"></label>
+            <label>Report status filter
+              <select id="report-status">
+                <option value="all">All statuses</option>
+                <option value="unread">unread</option>
+                <option value="read">read</option>
+              </select>
+            </label>
+            <label>Max papers
+              <select id="report-limit">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="999">All</option>
+              </select>
+            </label>
+            <label>Extra guidance<textarea id="report-guidance" rows="3" placeholder="Example: focus on ferroelectric materials and action items for my next proposal."></textarea></label>
+          </div>
+          <article id="report-output" class="report-output"></article>
+          </div>
+        </section>
+
+        <section class="panel sheet-panel collapsible-panel is-collapsed" data-panel="sheet" hidden>
+          <div class="panel-header">
+            <h2>Master paper sheet</h2>
+            <div class="panel-header-actions">
+              <p class="muted">This mirrors the fields you can export to and edit in Excel.</p>
+              <button class="secondary panel-toggle" type="button" data-panel-toggle="sheet" aria-expanded="false">Expand</button>
+            </div>
+          </div>
+          <div class="panel-body">
+          <div class="manual-actions sheet-actions">
+            <button id="seed-button" class="secondary hero-compact-action hero-compact-action-reset" type="button" title="Reset demo data">RESET</button>
+          </div>
+          <div class="card">
+            <h3>Recommended workflow</h3>
+            <p class="muted">
+              Keep one file named <strong><code>paper-list-master.csv</code></strong> as your paper database.
+              Edit it in Excel, save as CSV UTF-8, then import it back here when you want to refresh the app.
+            </p>
+          </div>
+          <div class="table-wrap">
+            <table class="sheet-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Title</th><th>Authors</th><th>Affiliations</th><th>Year</th>
+                  <th>Journal</th><th>Short journal</th><th>Volume</th><th>Pages</th><th>Type</th>
+                  <th>DOI</th><th>URL</th><th>PDF path</th><th>Tags</th><th>Starred</th>
+                  <th>Read</th><th>Status</th><th>Note</th><th>Summary</th><th>Source name</th>
+                  <th>Citation count</th><th>Citation source</th><th>Added</th><th>Updated</th><th>Source type</th>
+                </tr>
+              </thead>
+              <tbody id="sheet-body"></tbody>
+            </table>
+          </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- ===== Page containers (Phase 1+) ===== -->
+      <div data-page="bin" hidden aria-label="Bin"></div>
+      <div data-page="profile" hidden aria-label="Profile"></div>
+      <div data-page="news" hidden aria-label="News"></div>
+      <div data-page="maps" hidden aria-label="Maps">
+        <div class="maps-page" id="maps-page">
+          <header class="maps-header">
+            <div class="maps-header-text">
+              <h2 class="maps-title">Citation Map</h2>
+            </div>
+            <div class="maps-header-actions">
+              <div class="maps-scope" role="group" aria-label="Scope">
+                <button type="button" class="maps-scope-btn is-active" data-scope="all">All</button>
+                <button type="button" class="maps-scope-btn" data-scope="mine">My papers</button>
+                <button type="button" class="maps-scope-btn" data-scope="library">Library</button>
+              </div>
+              <select id="maps-filter-tag" class="maps-tag-filter" aria-label="Filter by tag">
+                <option value="">All tags</option>
+              </select>
+              <input id="maps-search" type="search" class="maps-search" placeholder="Search title, authors, journal" aria-label="Search papers">
+              <button id="maps-refresh-btn" class="secondary maps-refresh-btn" type="button">Refresh references</button>
+            </div>
+          </header>
+          <div class="maps-status" id="maps-status" hidden></div>
+          <div class="maps-canvas-wrap">
+            <svg id="maps-svg" class="maps-svg" role="img" aria-label="Citation graph"></svg>
+            <div id="maps-tooltip" class="maps-tooltip" hidden aria-hidden="true"></div>
+            <div id="maps-year-readout" class="maps-year-readout" hidden aria-hidden="true"></div>
+            <button type="button" class="maps-zoom-reset" data-zoom="reset" title="Recenter (double-click canvas)" aria-label="Recenter">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+              </svg>
+            </button>
+            <button type="button" class="maps-fullscreen" data-fullscreen="toggle" title="Fullscreen" aria-label="Fullscreen">
+              <svg viewBox="0 0 24 24" class="maps-fullscreen-enter" aria-hidden="true" focusable="false">
+                <path d="M5 9V5h4M19 9V5h-4M5 15v4h4M19 15v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg viewBox="0 0 24 24" class="maps-fullscreen-exit" aria-hidden="true" focusable="false" hidden>
+                <path d="M9 5v4H5M15 5v4h4M9 19v-4H5M15 19v-4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <aside id="maps-detail" class="maps-detail" hidden aria-label="Selected paper details"></aside>
+            <div class="maps-legend" aria-hidden="true">
+              <span class="maps-legend-item"><span class="maps-dot maps-dot-mine-main"></span>My paper (main)</span>
+              <span class="maps-legend-item"><span class="maps-dot maps-dot-mine-coauthor"></span>My paper (co-author)</span>
+              <span class="maps-legend-item"><span class="maps-dot maps-dot-library"></span>Library</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- ===== -->
+
+      <footer class="app-footer">
+        <div class="app-footer-row">
+          <p class="muted"><span class="footer-brand">Research Atlas | </span>Bugs, thoughts, complaints to the <a href="mailto:info@researchatlas.io"><span class="dev-full">developer</span><span class="dev-short">dev</span></a> | v1.0.0</p>
+        </div>
+      </footer>
+    </div><!-- /.content-wrap -->
+
+    <!-- ===== Mobile bottom navigation bar ===== -->
+    <!-- Order: Profile | News | [+] | Library | Maps -->
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Main navigation">
+      <div class="mobile-nav-inner">
+        <button class="mobile-nav-btn is-active" type="button" data-nav-page="profile" aria-current="page">
+          <span class="mobile-nav-btn-icon" aria-hidden="true"></span>Profile
+        </button>
+        <button class="mobile-nav-btn" type="button" data-nav-page="news">
+          <span class="mobile-nav-btn-icon" aria-hidden="true"></span>News
+        </button>
+        <button class="mobile-nav-plus-btn" id="mobile-quick-add-btn" type="button" aria-label="Quick add paper">+</button>
+        <button class="mobile-nav-btn" type="button" data-nav-page="library">
+          <span class="mobile-nav-btn-icon" aria-hidden="true"></span>Library
+        </button>
+        <button class="mobile-nav-btn" type="button" data-nav-page="maps">
+          <span class="mobile-nav-btn-icon" aria-hidden="true"></span>Maps
+        </button>
+      </div>
+    </nav>
+
+    <!-- ===== Mobile quick-add panel ===== -->
+    <div id="mobile-quick-add-panel" class="mobile-quick-add-panel" aria-label="Quick add paper">
+      <div class="mobile-quick-add-row">
+        <div class="mobile-quick-add-input-wrap">
+          <input id="mobile-quick-add-input" class="mobile-quick-add-input" type="text" placeholder="URL or DOI" autocorrect="off" autocapitalize="none" autocomplete="off" spellcheck="false">
+          <button id="mobile-quick-add-clear" class="input-clear-x is-hidden" type="button" aria-label="Clear" title="Clear">✕</button>
+        </div>
+        <button id="mobile-quick-add-fetch" class="mobile-quick-add-fetch" type="button">Fetch</button>
+        <button id="mobile-quick-add-submit" class="mobile-quick-add-submit" type="button">⚡Add</button>
+      </div>
+    </div>
+
+    <div class="scroll-buttons-stack">
+      <button id="scroll-top-button" class="scroll-top-button" type="button" aria-label="Back to top" title="Back to top" hidden></button>
+      <button id="scroll-bottom-button" class="scroll-bottom-button" type="button" aria-label="Go to bottom" title="Go to bottom" hidden></button>
+    </div>
+    <div id="app-toast" class="app-toast" aria-live="polite" aria-atomic="true"></div>
+
+    <div id="link-add-confirm" class="link-add-modal" hidden role="dialog" aria-modal="true" aria-labelledby="link-add-confirm-title">
+      <div class="link-add-modal-backdrop"></div>
+      <div class="link-add-modal-card card">
+        <h3 id="link-add-confirm-title">Add to library and link?</h3>
+        <p class="muted" id="link-add-confirm-source"></p>
+        <div class="link-add-modal-preview">
+          <p class="link-add-preview-title"></p>
+          <p class="link-add-preview-meta muted"></p>
+        </div>
+        <p class="link-add-modal-fallback muted" hidden>메타데이터를 가져오지 못했습니다. URL을 그대로 제목으로 저장합니다.</p>
+        <div class="manual-actions">
+          <button id="link-add-confirm-ok" class="primary" type="button">Add to library &amp; link</button>
+          <button id="link-add-confirm-cancel" class="secondary" type="button">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.app-shell -->
+
+  <template id="paper-template">
+    <article class="paper-card">
+      <div class="paper-main">
+        <div class="paper-quick-actions">
+          <button class="paper-pin secondary" type="button" aria-label="Pin paper"></button>
+          <button class="paper-favorite secondary" type="button" aria-label="Add favorite"></button>
+          <input class="paper-select-checkbox" type="checkbox" aria-label="Select paper">
+        </div>
+        <div class="paper-actions">
+          <button class="paper-edit secondary" type="button" aria-label="Edit paper"></button>
+          <button class="paper-delete" type="button" aria-label="Delete paper"></button>
+        </div>
+        <div class="paper-topline"><span class="paper-type"></span><span class="paper-journal"></span><span class="paper-year"></span></div>
+        <h3 class="paper-title"></h3>
+        <p class="paper-authors"></p>
+        <button class="paper-expand-toggle paper-authors-toggle" type="button" hidden>More</button>
+        <p class="paper-affiliations"></p>
+        <button class="paper-expand-toggle paper-affiliations-toggle" type="button" hidden>More</button>
+        <p class="paper-summary"></p>
+        <div class="paper-copy-row paper-citation-row" hidden>
+          <p class="paper-copy-group">
+            <span class="paper-citation paper-copy-text" data-copy-kind="citation" role="button" tabindex="0" title="Click to copy citation"></span>
+            <button class="paper-copy-button" type="button" data-copy-kind="citation" aria-label="Copy citation" title="Copy citation"></button>
+          </p>
+          <p class="paper-copy-group">
+            <span class="paper-doi paper-copy-text" data-copy-kind="doi" role="button" tabindex="0" title="Click to copy DOI"></span>
+            <button class="paper-copy-button" type="button" data-copy-kind="doi" aria-label="Copy DOI" title="Copy DOI"></button>
+          </p>
+          <p class="paper-copy-group">
+            <a class="paper-link-label" target="_blank" rel="noreferrer noopener"></a>
+            <button class="paper-copy-button" type="button" data-copy-kind="link" aria-label="Copy link" title="Copy link"></button>
+          </p>
+        </div>
+        <div class="paper-meta">
+          <a class="paper-pdf-link" target="_blank" rel="noreferrer noopener">PDF file</a>
+          <button class="paper-refresh-link" type="button">Update metadata</button>
+          <button class="paper-view-in-maps" type="button" hidden>View in Maps</button>
+          <span class="paper-mobile-citation" hidden></span>
+          <button class="paper-mark-read-link" type="button">Mark as read</button>
+          <span class="paper-added"></span>
+        </div>
+      </div>
+      <div class="paper-side">
+        <div class="paper-note-section">
+          <div class="paper-side-section-label">Notes</div>
+          <div class="paper-note-view" title="Click to edit note" tabindex="0" role="button" aria-label="Edit notes" hidden></div>
+          <div class="paper-note-block">
+            <label><textarea class="paper-note" rows="1" placeholder="Add your summary or takeaway" aria-label="Notes"></textarea></label>
+            <div class="paper-note-actions">
+              <button class="secondary paper-note-save" type="button">Save note</button>
+              <span class="paper-note-saved" aria-hidden="true">Saved</span>
+              <span class="note-char-count" aria-live="polite"></span>
+            </div>
+          </div>
+        </div>
+        <div class="paper-link-block">
+          <div class="paper-side-section-label">Links</div>
+          <div class="paper-link-list chip-row compact"></div>
+          <div class="paper-link-add-row">
+            <div class="paper-link-search-wrap">
+              <input class="paper-link-search-input" placeholder="Search library or paste URL/DOI" autocomplete="off" spellcheck="false">
+              <div class="paper-link-suggest" hidden></div>
+            </div>
+          </div>
+        </div>
+        <div class="paper-tag-block">
+          <label>Tags<select class="paper-tag-select"></select></label>
+          <div class="paper-inline-actions">
+            <input class="paper-tag-new-input" placeholder="New tag">
+            <button class="secondary paper-tag-add" type="button">Add new</button>
+          </div>
+        </div>
+        <div class="paper-tag-list chip-row compact"></div>
+      </div>
+    </article>
+  </template>
+
+  <script src="./journal-abbreviations.js?v=1.0.0"></script>
+  <script src="./config.js?v=1.0.0"></script>
+  <script src="./js/localapi/boot.js?v=1.0.0"></script>
+  <script src="./js/utils/author-badges.js?v=1.0.0"></script>
+  <script src="./js/utils/achievement-defs.js?v=1.0.0"></script>
+  <script src="./js/utils/achievement-engine.js?v=1.0.0"></script>
+  <script src="./app.js?v=1.0.0"></script>
+  <script src="./vendor/d3.min.js?v=1.0.0" defer></script>
+  <script type="module" src="./js/main.js?v=1.0.0"></script>
+</body>
+</html>

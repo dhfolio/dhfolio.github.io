@@ -1,0 +1,12 @@
+_site/
+_preview/
+node_modules/
+*.log
+*.bak
+*.tmp-sync
+*.bat
+.env
+.claude/
+tools/test/tmp-*/
+Thumbs.db
+.DS_Store

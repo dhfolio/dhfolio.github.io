@@ -1,0 +1,974 @@
+/* pages/maps.css — Citation Map (Phase 5, v0.9.0)
+ * Theme-aware via existing CSS vars in base.css.
+ * Mobile breakpoint matches the rest of the app at 700px.
+ */
+
+.maps-page,
+.maps-page * { font-family: "Roboto", "Segoe UI", Arial, sans-serif; }
+
+.maps-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 0 32px;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.maps-header {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.maps-header-text { min-width: 0; flex: 0 0 auto; }
+
+.maps-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.maps-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.83rem;
+  color: var(--muted);
+}
+
+.maps-header-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Segmented control: chip-gray track, white "thumb" on the active item.
+   No outer border and no inner dividers — the chip background defines the
+   shape, the thumb fits the track exactly so there's no visible gap. */
+.maps-scope {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--chip);
+}
+
+.maps-scope-btn {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 0.82rem;
+  padding: 5px 12px;
+  border-radius: 7px; /* outer 10 − padding 3 = 7 → no gap on the active thumb */
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+}
+.maps-scope-btn:hover { color: var(--text); }
+.maps-scope-btn.is-active {
+  background: var(--panel-strong);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+body.dark-mode .maps-scope-btn.is-active {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.maps-refresh-btn {
+  font-size: 0.82rem;
+  padding: 6px 12px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.maps-refresh-btn[disabled] { opacity: 0.55; cursor: progress; }
+
+/* Search input: matches the segmented control's height, radius and chip-gray
+   fill so the two read as siblings of one component. */
+.maps-search {
+  font-size: 0.82rem;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--chip);
+  color: var(--text);
+  width: 200px;
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 1 200px;
+  outline: none;
+  transition: box-shadow 120ms ease;
+}
+.maps-search:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.maps-search::placeholder { color: var(--muted); }
+
+.maps-tag-filter {
+  font-size: 0.82rem;
+  padding: 5px 26px 5px 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--chip);
+  color: var(--text);
+  min-width: 0;
+  width: 140px;
+  max-width: 160px;
+  flex: 0 1 140px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+                    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  transition: box-shadow 120ms ease;
+}
+.maps-tag-filter:focus {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+/* Search-narrow: dim non-match nodes/edges instead of hiding them, so the
+   map's overall shape and cluster positions remain readable. Click-context
+   highlight classes (.is-active-label / .is-selected / .is-focal-label /
+   .is-panel-closed-focal) are layered later in the cascade and override
+   .is-search-dim, so a clicked paper's lit context survives a search. */
+.maps-node.is-search-dim:not(.is-active-label):not(.is-selected):not(.is-focal-label):not(.is-panel-closed-focal) .maps-node-circle { opacity: 0.12; }
+.maps-link.is-search-dim:not(.is-highlight) { stroke-opacity: 0.05; }
+
+/* Search match: nodes whose title/authors/journal directly hit the query. */
+.maps-node.is-search-match .maps-node-circle,
+.maps-node.is-tag-match .maps-node-circle {
+  stroke: var(--accent);
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 5px var(--accent));
+}
+.maps-node-mine-main.is-search-match .maps-node-circle,
+.maps-node-mine-main.is-tag-match .maps-node-circle {
+  stroke-width: 5;
+}
+
+/* ── Status row ─────────────────────────────────────────────────────────── */
+.maps-status {
+  font-size: 0.82rem;
+  color: var(--muted);
+  padding: 6px 10px;
+  background: var(--chip);
+  border-radius: 8px;
+  display: inline-block;
+  align-self: flex-start;
+}
+.maps-status[data-kind="error"] {
+  color: var(--accent-dark);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* ── Canvas + SVG ───────────────────────────────────────────────────────── */
+.maps-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: clamp(520px, calc(100vh - 240px), 880px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel-strong);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+
+.maps-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.maps-svg:active { cursor: grabbing; }
+
+/* ── Year axis ──────────────────────────────────────────────────────────── */
+.maps-year-line {
+  stroke: var(--line);
+  stroke-width: calc(var(--vis-cs, 1) * 1px);
+  stroke-dasharray: 2 6;
+  opacity: 0.55;
+}
+.maps-year-line.is-major {
+  stroke-dasharray: none;
+  opacity: 0.85;
+}
+.maps-year-label {
+  fill: var(--muted);
+  font-size: 11px;
+  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
+  user-select: none;
+  pointer-events: none;
+}
+.maps-year-label.is-major { fill: var(--text); font-weight: 600; }
+
+/* Crosshair (variant A) — horizontal dashed line follows mouse Y */
+.maps-year-crosshair {
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+  opacity: 0.7;
+  pointer-events: none;
+}
+.maps-year-readout {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: color-mix(in srgb, var(--panel-strong) 92%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  user-select: none;
+  z-index: 4;
+}
+
+.maps-zoom-reset {
+  position: absolute;
+  top: 46px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--panel-strong) 92%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: var(--shadow);
+  opacity: 0.7;
+  z-index: 4;
+  user-select: none;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.maps-zoom-reset:hover {
+  opacity: 1;
+  background: var(--panel-strong);
+}
+.maps-zoom-reset svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.maps-fullscreen {
+  position: absolute;
+  top: 82px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--panel-strong) 92%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: var(--shadow);
+  opacity: 0.7;
+  z-index: 4;
+  user-select: none;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.maps-fullscreen:hover {
+  opacity: 1;
+  background: var(--panel-strong);
+}
+.maps-fullscreen svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* ── Edges ──────────────────────────────────────────────────────────────── */
+.maps-link {
+  stroke: var(--muted);
+  stroke-opacity: 0.32;
+  stroke-width: calc(var(--vis-cs, 1) * 1px);
+  fill: none;
+  transition: stroke-opacity 120ms ease;
+}
+.maps-link.is-dim { stroke-opacity: 0.08; }
+.maps-link.is-highlight {
+  stroke: var(--accent);
+  stroke-opacity: 0.85;
+  stroke-width: calc(var(--vis-cs, 1) * 1.5px);
+}
+/* Transitive citation chain (ancestor-of-ancestor) — same accent colour but
+ * dashed to signal indirect connection. */
+.maps-link.is-highlight.is-transitive {
+  stroke-dasharray: 5 4;
+  stroke-opacity: 0.7;
+}
+.maps-arrow-head {
+  fill: var(--muted);
+  opacity: 0.45;
+}
+
+/* User-curated bidirectional links — appended to the DOM before ref edges
+ * (see drawGraph sort) so they sit *under* the slim citation arrows as a
+ * soft accent halo. No arrowhead because the relation is symmetric. */
+.maps-link.is-manual {
+  stroke: var(--accent);
+  stroke-opacity: 0.18;
+  stroke-width: calc(var(--vis-cs, 1) * 4px);
+}
+.maps-link.is-manual.is-highlight {
+  stroke-opacity: 0.55;
+  stroke-width: calc(var(--vis-cs, 1) * 4.5px);
+}
+.maps-link.is-manual.is-dim { stroke-opacity: 0.04; }
+.maps-link.is-manual.is-search-dim { stroke-opacity: 0.03; }
+
+/* ── Nodes ──────────────────────────────────────────────────────────────── */
+.maps-node-circle {
+  stroke: var(--panel-strong);
+  stroke-width: 1.5;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+.maps-node.is-dim .maps-node-circle { opacity: 0.18; }
+.maps-node-label-group.is-dim { opacity: 0.18; }
+
+.maps-node-mine-main .maps-node-circle {
+  fill: var(--accent);
+  stroke: var(--accent-dark);
+  stroke-width: 2.5;
+}
+.maps-node-mine-coauthor .maps-node-circle {
+  fill: color-mix(in srgb, var(--accent) 45%, var(--panel-strong));
+}
+.maps-node-library .maps-node-circle {
+  fill: var(--chip);
+  stroke: var(--accent-dark);
+  stroke-width: 1.5;
+}
+.maps-node-external .maps-node-circle {
+  fill: var(--muted);
+  opacity: 0.55;
+}
+
+/* DOI-less external resource (blog/news/lab note) joined via a manual
+ * link. Smaller circle, dashed border, italicized label. */
+.maps-node-web .maps-node-circle {
+  fill: var(--panel);
+  stroke: var(--muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 2;
+  opacity: 0.78;
+}
+.maps-node-web .maps-node-label,
+.maps-node-web .maps-node-label-byline,
+.maps-node-web .maps-node-label-title {
+  font-style: italic;
+  opacity: 0.78;
+}
+
+.maps-node-label {
+  fill: var(--text);
+  font-size: 11px;
+  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: var(--panel-strong);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+.maps-node-label-byline { font-weight: 600; font-size: 11px; }
+.maps-node-label-title { font-size: 11px; fill: var(--muted); }
+
+/* Labels are hidden by default; shown only on the structurally important
+ * (high-in-degree) nodes (.has-label), on the adjacent nodes while a node
+ * is hovered or selected (.is-active-label), and on every search match
+ * (.is-search-info-label) so brief info surfaces next to each hit. The
+ * focal node itself (.is-focal-label) hides its inline label because the
+ * hover tooltip / click-detail panel already shows the same info — keeping
+ * both creates duplicate text.
+ *
+ * Label groups live in a dedicated `maps-label-layer` (sibling of
+ * `maps-node-layer`, painted last) so they always appear on top of every
+ * circle. State classes are mirrored from .maps-node onto the label group
+ * element by the JS. */
+.maps-node-label-group { display: none; }
+.maps-node-label-group.has-label:not(.is-focal-label),
+.maps-node-label-group.is-active-label:not(.is-focal-label),
+.maps-node-label-group.is-search-info-label:not(.is-focal-label) { display: block; }
+.maps-node-label-group.is-search-dim:not(.is-active-label):not(.is-selected):not(.is-focal-label):not(.is-panel-closed-focal) {
+  opacity: 0.12;
+}
+
+/* Tag filter — independent from search; same hide-by-class pattern. */
+.maps-node.is-hidden-by-tag { display: none; }
+.maps-node-label-group.has-label.is-hidden-by-tag,
+.maps-node-label-group.is-active-label.is-hidden-by-tag,
+.maps-node-label-group.is-hidden-by-tag { display: none; }
+.maps-link.is-hidden-by-tag { display: none; }
+
+/* For neighbour nodes lit up only because of the current focus (i.e. NOT a
+ * permanently-labelled .has-label node), drop the title line so the screen
+ * doesn't get cluttered with truncated titles. */
+.maps-node-label-group.is-active-label:not(.is-focal-label):not(.has-label):not(.is-search-info-label) .maps-node-label-title {
+  display: none;
+}
+
+/* When the detail panel is closed but a node remains selected, surface its
+ * byline + title as an inline label next to the focal node so the user can
+ * still identify the still-selected paper. Overrides the default
+ * :not(.is-focal-label) gating above by being more specific. */
+.maps-node-label-group.is-focal-label.is-panel-closed-focal { display: block; }
+.maps-node-label-group.is-panel-closed-focal .maps-node-label-title { display: block; }
+
+.maps-node-review-mark {
+  fill: var(--panel-strong);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: "Roboto", "Segoe UI", Arial, sans-serif;
+  pointer-events: none;
+  user-select: none;
+}
+.maps-node-library .maps-node-review-mark { font-size: 8px; }
+.maps-node.is-dim .maps-node-review-mark { opacity: 0.18; }
+
+@keyframes maps-ember-pulse {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 4px var(--map-selected-glow, #ffb24a))
+      drop-shadow(0 0 10px color-mix(in srgb, var(--map-selected-glow, #ff8c28) 50%, transparent));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 8px var(--map-selected-glow, #ffd07a))
+      drop-shadow(0 0 18px color-mix(in srgb, var(--map-selected-glow, #ffaa3c) 85%, transparent));
+  }
+}
+
+.maps-node.is-selected .maps-node-circle {
+  stroke: var(--map-selected-glow, #ffb24a);
+  stroke-width: 2.5;
+  animation: maps-ember-pulse 1.6s ease-in-out infinite;
+}
+.maps-node-mine-main.is-selected .maps-node-circle {
+  stroke: var(--map-selected-glow, #ffb24a);
+  stroke-width: 3;
+}
+
+.maps-node.is-search-match.is-selected .maps-node-circle,
+.maps-node.is-tag-match.is-selected .maps-node-circle {
+  animation: maps-ember-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maps-node.is-selected .maps-node-circle {
+    animation: none;
+    filter:
+      drop-shadow(0 0 6px var(--map-selected-glow, #ffb24a))
+      drop-shadow(0 0 14px color-mix(in srgb, var(--map-selected-glow, #ffaa3c) 70%, transparent));
+  }
+}
+
+/* ── Legend ─────────────────────────────────────────────────────────────── */
+.maps-legend {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel-strong) 88%, transparent);
+  border: 1px solid var(--line);
+  font-size: 0.74rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+.maps-legend-item { display: inline-flex; align-items: center; gap: 6px; }
+.maps-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--panel-strong);
+}
+.maps-dot-mine-main {
+  background: var(--accent);
+  border-color: var(--accent-dark);
+  border-width: 3px;
+}
+.maps-dot-mine-coauthor { background: color-mix(in srgb, var(--accent) 45%, var(--panel-strong)); }
+.maps-dot-library { background: var(--chip); border-color: var(--accent-dark); }
+.maps-dot-external { background: var(--muted); opacity: 0.55; }
+
+/* ── Detail panel (right side) ──────────────────────────────────────────── */
+.maps-detail {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: min(500px, calc(100% - 24px));
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  box-shadow: var(--shadow);
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.maps-detail.is-side-left { left: 12px; right: auto; }
+.maps-detail-close,
+.maps-detail-pos-toggle,
+.maps-detail-side-toggle {
+  position: absolute;
+  top: 8px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.maps-detail-close { right: 8px; }
+.maps-detail-pos-toggle { right: 40px; display: none; }
+.maps-detail-side-toggle { right: 40px; display: inline-flex; }
+.maps-detail-close:hover,
+.maps-detail-pos-toggle:hover,
+.maps-detail-side-toggle:hover {
+  color: var(--text);
+  background: var(--chip);
+}
+
+.maps-detail-line-meta {
+  display: flex;
+  align-items: baseline;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+  margin: 0 80px 4px 0;
+  overflow: hidden;
+}
+.maps-detail-meta-journal {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.maps-detail-meta-sep,
+.maps-detail-meta-date {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.maps-detail-meta-sep {
+  padding: 0 6px;
+}
+.maps-detail-title {
+  margin: 0 0 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+.maps-detail-line-authors {
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.maps-detail-line-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  padding-bottom: 4px;
+}
+
+/* ── References list (inside detail panel) ──────────────────────────────── */
+.maps-detail-refs { margin-top: 12px; }
+
+.maps-ref-loading,
+.maps-ref-empty,
+.maps-ref-error {
+  font-size: 0.78rem;
+  color: var(--muted);
+  padding: 10px 0;
+  text-align: center;
+}
+.maps-ref-error { color: var(--accent-dark); }
+
+.maps-ref-fetch-btn {
+  display: block;
+  margin: 8px auto 0;
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.maps-ref-fetch-btn:hover { background: var(--accent); color: #fff; }
+body.dark-mode .maps-ref-fetch-btn:hover { color: #1a1413; }
+
+.maps-ref-header {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.maps-ref-header-label { flex: 0 0 auto; }
+
+.maps-ref-filter-btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.maps-ref-filter-btn:hover { color: var(--accent); border-color: var(--accent); }
+.maps-ref-filter-btn[data-mode="in-library"] {
+  background: color-mix(in srgb, var(--good) 18%, transparent);
+  color: var(--good);
+  border-color: color-mix(in srgb, var(--good) 35%, transparent);
+}
+
+.maps-ref-fill-all-btn,
+.maps-ref-refetch-all-btn {
+  margin-left: auto;
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.maps-ref-fill-all-btn:hover,
+.maps-ref-refetch-all-btn:hover { color: var(--accent); border-color: var(--accent); }
+.maps-ref-fill-all-btn[disabled],
+.maps-ref-refetch-all-btn[disabled] { opacity: 0.55; cursor: progress; }
+/* When both right-aligned buttons are present, only the first one needs the
+ * margin-left: auto to push the group right; the second sits flush after it. */
+.maps-ref-fill-all-btn + .maps-ref-refetch-all-btn { margin-left: 0; }
+.maps-ref-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background: var(--chip);
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.maps-ref-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.maps-ref-item {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  font-size: 0.78rem;
+  line-height: 1.32;
+}
+/* 4-line ref card: meta · title · authors · actions */
+.maps-ref-line-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+}
+.maps-ref-title {
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 2px;
+  line-height: 1.32;
+}
+.maps-ref-title.is-untitled {
+  color: var(--muted);
+  font-style: italic;
+  font-weight: 500;
+}
+.maps-ref-line-authors {
+  margin-top: 2px;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.maps-ref-line-actions {
+  margin-top: 5px;
+  font-size: 0.74rem;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.maps-ref-action {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+}
+.maps-ref-action:hover { text-decoration: underline; }
+.maps-ref-action[disabled] { opacity: 0.55; cursor: progress; }
+.maps-ref-action.is-badge {
+  color: var(--good);
+  font-weight: 600;
+  cursor: default;
+}
+.maps-ref-action.is-badge:hover { text-decoration: none; }
+.maps-ref-action-sep {
+  color: var(--muted);
+  opacity: 0.55;
+  user-select: none;
+}
+
+/* Custom hover tooltip — drawn over the SVG canvas */
+.maps-tooltip {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  max-width: 320px;
+  padding: 8px 10px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text);
+}
+.maps-tooltip-meta {
+  font-size: 0.7rem;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+}
+.maps-tooltip-title {
+  margin-top: 2px;
+  font-weight: 600;
+  color: var(--text);
+}
+.maps-tooltip-authors {
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ── Empty state ────────────────────────────────────────────────────────── */
+.maps-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--panel-strong) 92%, transparent);
+}
+.maps-empty-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  max-width: 420px;
+}
+.maps-empty-action {
+  appearance: none;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+body.dark-mode .maps-empty-action { color: #1a1413; }
+.maps-empty-action:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+
+/* ── Mobile ─────────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .maps-header { flex-direction: column; align-items: stretch; flex-wrap: wrap; }
+  /* Mobile: scope + tag share row 1, search + refresh share row 2. Use a
+     2-column grid so the wide search/refresh items can span both columns
+     when needed. */
+  .maps-header-actions {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    justify-content: stretch;
+  }
+  .maps-header-actions .maps-scope { grid-column: 1 / 2; }
+  .maps-header-actions .maps-tag-filter {
+    grid-column: 2 / 3;
+    width: 100%;
+    max-width: none;
+    flex: 1 1 auto;
+  }
+  .maps-header-actions #maps-search { grid-column: 1 / -1; width: 100%; flex: 1 1 100%; }
+  .maps-header-actions .maps-refresh-btn { grid-column: 1 / -1; }
+  .maps-canvas-wrap { height: clamp(420px, calc(100vh - 200px), 720px); }
+  .maps-detail {
+    top: auto;
+    right: 12px;
+    bottom: 12px;
+    width: calc(100% - 24px);
+    max-height: 50%;
+  }
+  .maps-detail.is-side-left { left: auto; right: 12px; }
+  .maps-detail.is-pos-top {
+    top: 12px;
+    bottom: auto;
+  }
+  .maps-detail-side-toggle { display: none; }
+  .maps-detail-line-meta { margin-right: 80px; }
+  .maps-detail:not([hidden]) ~ .maps-legend { display: none; }
+  .maps-detail-pos-toggle { display: inline-flex; align-items: center; justify-content: center; }
+  .maps-legend { font-size: 0.68rem; gap: 8px; }
+
+  /* Mobile + Maps page: lock viewport, no scroll, no footer, edge-to-edge canvas. */
+  body.is-page-maps { overflow: hidden; }
+  body.is-page-maps .app-shell {
+    height: 100dvh;
+    padding: 0 0 60px 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  body.is-page-maps .hero { padding: 10px 8px 0; }
+  /* Maps mobile zeroes app-shell side padding for an edge-to-edge canvas, but
+     above-canvas siblings (auth-panel, etc.) need the same 8px gutter Library
+     gets from app-shell on other pages. */
+  body.is-page-maps .panel.auth-panel { margin-left: 8px; margin-right: 8px; }
+  body.is-page-maps .content-wrap {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  body.is-page-maps [data-page="maps"] {
+    flex: 1;
+    min-height: 0;
+  }
+  body.is-page-maps .maps-page {
+    height: 100%;
+    padding: 0;
+    gap: 8px;
+  }
+  body.is-page-maps .maps-header { padding: 0 12px; }
+  body.is-page-maps .maps-canvas-wrap {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  body.is-page-maps .app-footer { display: none; }
+}
+
+/* ── Desktop + Maps page ───────────────────────────────────────────────────
+   Lock viewport, fill remaining space with the canvas, keep the footer
+   visible at the bottom. No right scrollbar. */
+@media (min-width: 701px) {
+  body.is-page-maps { overflow: hidden; }
+  body.is-page-maps .app-shell {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  body.is-page-maps .content-wrap {
+    flex: 1;
+    min-height: 0;
+    padding-top: calc(var(--topbar-h) + 14px);
+    padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  body.is-page-maps [data-page="maps"] {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  body.is-page-maps .maps-page {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+    gap: 10px;
+  }
+  body.is-page-maps .maps-canvas-wrap {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+  body.is-page-maps .app-footer {
+    margin-top: 0;
+    padding: 6px 4px;
+    border-top: 1px solid rgba(164, 120, 86, 0.18);
+    flex: 0 0 auto;
+  }
+}

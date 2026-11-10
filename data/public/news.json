@@ -1,0 +1,390 @@
+{
+ "slug": "dukhyun",
+ "name": "Duk-Hyun Choe",
+ "isPrivate": false,
+ "items": [
+  {
+   "id": "news_mufti4ou_gv2eth",
+   "dateLabel": "2026/09/23",
+   "sortDate": "2026-09-23",
+   "endDate": "",
+   "title": "",
+   "body": "RLE Semester Photoshoot!",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/89e58e0bf62b9cf0.jpg",
+     "caption": ""
+    },
+    {
+     "src": "/media/e414623fded590f6.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mu6xudec_pjq2gx",
+   "dateLabel": "2026/09/16",
+   "sortDate": "2026-09-16",
+   "endDate": "",
+   "title": "Industry plenary talk at NSF FuSe Awardees Workshop",
+   "body": "Duk-Hyun Choe gave an industry plenary presentation titled \"Hafnia-Based Ferroelectric Memories for DRAM and NAND\" at the [NSF FuSe Awardees Workshop](https://blog.umd.edu/fuse/program/) held in University of Maryland, MD, USA.",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt92k9wq_nvy1m5",
+   "dateLabel": "2026/06/21-24",
+   "sortDate": "2026-06-21",
+   "endDate": "2026-06-24",
+   "title": "Invited talk at DRC 2026",
+   "body": "- Duk-Hyun Choe gave an invited talk titled \"Designing Oxide-Channel Ferroelectric Transistors for DRAM and NAND\" at the [Device Research Conference (DRC)](https://deviceresearchconference.org/2026/program/keynote-and-invited-speakers) held in University of Michigan, MI, USA.",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt92dgnl_zevfop",
+   "dateLabel": "2026/01/30-2027/01/29",
+   "sortDate": "2026-01-30",
+   "endDate": "2027-01-29",
+   "title": "New Position: Visiting Researcher at MIT",
+   "body": "- Duk-Hyun will be visiting [Pablo Jarillo-Herrero's group](https://jarillo-herrero.mit.edu/) at MIT on an industrial sabbatical from Samsung.",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt929wk7_550d9i",
+   "dateLabel": "2025/11/26",
+   "sortDate": "2025-11-26",
+   "endDate": "",
+   "title": "Nature paper!",
+   "body": "- Our paper \"[Ferroelectric transistors for low-power NAND flash memory](https://www.nature.com/articles/s41586-025-09793-3)\" is published in Nature.\n- Press (50+ news articles)\n  - [Science] [New materials could supercharge computer memory chips](https://www.science.org/content/article/new-materials-could-supercharge-computer-memory-chips)\n  - [삼성전자 뉴스룸] [삼성전자 연구진이 규명한 초저전력 낸드플래시 기술, 세계적 학술지에 게재되다](https://news.samsungsemiconductor.com/kr/%ec%82%bc%ec%84%b1%ec%a0%84%ec%9e%90-%ec%97%b0%ea%b5%ac%ec%a7%84%ec%9d%b4-%ea%b7%9c%eb%aa%85%ed%95%9c-%ec%b4%88%ec%a0%80%ec%a0%84%eb%a0%a5-%eb%82%b8%eb%93%9c%ed%94%8c%eb%9e%98%ec%8b%9c-%ea%b8%b0/)\n  - [Samsung Newsroom] [Samsung Researchers Publish Ultra-Low-Power NAND Flash Innovation in Nature](https://news.samsungsemiconductor.com/global/samsung-researchers-publish-ultra-low-power-nand-flash-innovation-in-nature/)\n  - [조선비즈] [삼성전자, 낸드플래시 한계 넘는 차세대 초저전력 메모리 기술 공개](https://n.news.naver.com/mnews/article/366/0001126153?sid=105)\n  - [동아사이언스] [삼성전자, 전력소모 96% 이상 줄이는 차세대 초저전력 낸드플래시 개발](https://www.dongascience.com/news.php?idx=75261)\n  - [연합뉴스] [삼성전자 초저전력 낸드 기술, '네이처'에 게재](https://n.news.naver.com/mnews/article/001/0015764707?sid=101https://n.news.naver.com/mnews/article/001/0015764707?sid=101)\n  - [tom's HARDWARE] [Samsung touts 96% lower-power NAND design](https://www.tomshardware.com/tech-industry/semiconductors/samsung-researchers-publish-96percent-lower-power-nand-design-based-on-ferroelectric-transistors)\n- Others\n  - Our paper is selected as the front cover of [Program Book for 2026 봄 한국물리학회](https://www.kps.or.kr/conference/event/content/content.php?_mid=1604,1635)",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/b7aa3cf8c3d1d43a.jpg",
+     "caption": ""
+    },
+    {
+     "src": "/media/a4883ad4859f1ead.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt928h68_ny1oku",
+   "dateLabel": "2025/09/29-30",
+   "sortDate": "2025-09-29",
+   "endDate": "2025-09-30",
+   "title": "Samsung-MIT Semiconductor Workshop at MIT",
+   "body": "- Duk-Hyun Choe attended the Samsung-MIT Semiconductor Workshop held in MIT, Cambridge, MA, USA.\n- Duk-Hyun delivered an [invited talk](https://www.mtl.mit.edu/events-seminars/seminars/ferroelectric-hafnia-physics-materials-and-devices) at the [MTL Seminar Series](https://www.mtl.mit.edu/events-seminars/seminars) (hosted by [Prof. Suraj Cheema](https://scholar.google.com/citations?user=1mqHo_sAAAAJ&hl=en))",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/f15b10e4d1c3c8cc.jpg",
+     "caption": ""
+    },
+    {
+     "src": "/media/48c7b2b9e8e2d0f7.jpg",
+     "caption": ""
+    },
+    {
+     "src": "/media/c5e9065183830f4c.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt927y4j_nglrly",
+   "dateLabel": "2025/07/10",
+   "sortDate": "2025-07-10",
+   "endDate": "",
+   "title": "",
+   "body": "- Duk-Hyun Choe participated in [제 21회 고등과학원 전자구조계산회](http://events.kias.re.kr/h/ESCW2025/?pageNo=5884) as a session chair.",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt926r8r_kr9yg3",
+   "dateLabel": "2025/06/26-27",
+   "sortDate": "2025-06-26",
+   "endDate": "2025-06-27",
+   "title": "Samsung-MIT Semiconductor Workshop at Samsung",
+   "body": "- Duk-Hyun Choe attended 2025 MIT-Samsung Semiconductor Workshop held in Samsung, Hwasung, Korea.\n  - [Bridging Academia and Industry: Insight from the 2025 MIT-Samsung Workshop](https://news.samsungsemiconductor.com/global/bridging-academia-and-industry-insight-from-the-2025-mit-samsung-workshop/)\n  - [MIT와 삼성전자가 손잡은 진짜 이유 | 미래 기술 혁신의 최전선, 삼성전자 반도체 뉴스룸 유튜브 ](https://youtu.be/AYBdfsdjzW0?si=b3IKcOZhExG3Y9Me)",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/ccd0017b65c1418a.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt9267to_rcxh5z",
+   "dateLabel": "2024/09/24-27",
+   "sortDate": "2024-09-24",
+   "endDate": "2024-09-27",
+   "title": "",
+   "body": "- Duk-Hyun Choe attended the LMD/NMP Annual Review by Semiconductor Research Corporation (SRC) held in Intel Gordon Moore Park, Hillsboro, OR, USA.",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/69ba91935d9ba5d4.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt925srr_p1rfu2",
+   "dateLabel": "2024/07/24",
+   "sortDate": "2024-07-24",
+   "endDate": "",
+   "title": "",
+   "body": "- Sijung Yoo, Donghoon Kim, Duk-Hyun Choe (20% contribution) has been awarded DS Paper Award by Samsung Electronics [5M KRW].",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mtit452p_cyjqnr",
+   "dateLabel": "2024/07/11-12",
+   "sortDate": "2024-07-11",
+   "endDate": "2024-07-12",
+   "title": "Invited Talk at 제 21회 고등과학원 전자구조계산회 (Seoul, Korea)",
+   "body": "- Duk-Hyun Choe delivered an invited talk titled \"Ferroelectric HfO2: from physics to industry\" at [제 21회 고등과학원 전자구조계산회](https://events.kias.re.kr/h/ESCW2024/).\n- The symposium took place at KIAS ([고등과학원](kias.re.kr)) Seoul, Korea.",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt922xf0_ujo2zk",
+   "dateLabel": "2023/11/28",
+   "sortDate": "2023-11-28",
+   "endDate": "",
+   "title": "",
+   "body": "- Our NCFET team of 16 members, led by Duk-Hyun Choe, was honored as one of the top 25 teams (ranking undisclosed) at the SAIT Project Festival [~ 67M KRW/team].",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt922gnj_9w5yow",
+   "dateLabel": "2023/10/24",
+   "sortDate": "2023-10-24",
+   "endDate": "",
+   "title": "",
+   "body": "- Sanghyun Jo, Duk-Hyun Choe (20% contribution), Hyangsook Lee has been awarded Gold Award in the Samsung Best Paper Awards.\n- This represents the 1st place in the Materials Division [10M KRW].",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt921f1r_hw3b9q",
+   "dateLabel": "2023/05/21-24",
+   "sortDate": "2023-05-21",
+   "endDate": "2023-05-24",
+   "title": "",
+   "body": "- Duk-Hyun Choe attended the IMW 2023 ([International Memory Workshop](https://www.ewh.ieee.org/soc/eds/imw/)) held in Monterey, CA, USA.",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt920fhp_8781j3",
+   "dateLabel": "2023/03/01",
+   "sortDate": "2023-03-01",
+   "endDate": "",
+   "title": "Promotion: Principal Researcher (CL4)",
+   "body": "- Duk-Hyun Choe has been granted an early promotion to Principal Researcher (CL4) at Samsung Advanced Institute of Technology (SAIT).",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mtbyom8a_xhhcp4",
+   "dateLabel": "2023/01/29-31",
+   "sortDate": "2023-01-29",
+   "endDate": "2023-01-31",
+   "title": "Invited Talk at the 18th Joint Symposium on Dielectrics (Busan, Korea)",
+   "body": "- Duk-Hyun Choe delivered an invited talk titled \"Fundamentals and applications of hafnia-based ferroelectrics for next generation semiconductor technology\" at the 18th Joint Symposium on Dielectrics ([제18차 유전체연합심포지엄](https://sites.google.com/view/dielectrics18/%EC%86%8C%EA%B0%9C?authuser=0)). \n- The symposium took place on January 29-31, 2023, at the Westin Josun Busan, Korea.",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/c9132bc4f49d633a.jpg",
+     "caption": ""
+    },
+    {
+     "src": "/media/a3d25259e382d8a8.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt91yvak_pw1qsq",
+   "dateLabel": "2022/07/01",
+   "sortDate": "2022-07-01",
+   "endDate": "",
+   "title": "",
+   "body": "- Duk-Hyun Choe gave an invited talk titled \"Atomic-level understanding of HfO2-based ferroelectrics and their ultrafast polarization switching\" at the [`22 ISAF](https://2022.ieee-isaf.org/) conference held in Tours, France.\n- Duk-Hyun Choe was invited as a [Young Ferroelectric Investigator](https://2022.ieee-isaf.org/young-investigator-invited-speakers/), and co-chaired 2 sessions with [Dr. Jan Schultheiss](https://scholar.google.com/citations?user=5ude2roAAAAJ&hl=de).",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/e8fb5252b20e08b2.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt91v7qr_t94xmw",
+   "dateLabel": "2021/12/10",
+   "sortDate": "2021-12-10",
+   "endDate": "",
+   "title": "",
+   "body": "- Our paper \"[Unexpectedly low barrier of ferroelectric switching in HfO2 via topological domain walls](https://doi.org/10.1016/j.mattod.2021.07.022)\" by Duk-Hyun Choe et al. is recognized as [one of the 3 Highlighted Papers](https://www.sciencedirect.com/science/article/pii/S1369702121004132/pdfft?md5=10c43101ffd012f80c7b20f8fe9d5fa7&pid=1-s2.0-S1369702121004132-main.pdf) in the Nov. issue of Materials Today journal (2021 Impact Factor: 31.04).\n- This represents [one of the top 13 papers](https://www.sciencedirect.com/journal/materials-today/special-issue/10XQSJV19BC) in total 179 published papers in 2021.",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/2b75fb403519af77.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt91kqgm_o7k9z5",
+   "dateLabel": "2021/10/29",
+   "sortDate": "2021-10-29",
+   "endDate": "",
+   "title": "",
+   "body": "- Our paper \"Surface-Functionalized Hafnia with Bespoke Ferroelectric Properties for Memory and Logic Applications\" by Duk-Hyun Choe et al. is recognized as one of the [15 highlighted papers](https://lnkd.in/gi_X84YX) out of 220+ accepted papers in IEDM 2021. \n- The paper is briefly introduced in the [IEEE EDS Newsletter](https://l.facebook.com/l.php?u=https%3A%2F%2Feds.ieee.org%2Fimages%2Ffiles%2Fnewsletters%2FNewsletter_Jan22.pdf%3Ffbclid%3DIwAR2px50q_UzJ8TQPKnAb6Zi2Aignsv1pAM8agiZ5oFWWiUzmYb5w8G74kw0&h=AT3EnZh1NmNv3T8D-AWqG7vcryCAohsbc-Ol94-bwMGkyPOQFGxW7cPbN3apQy87mDUI3XhpXRAi5CiTs6xTjJ6K6T2q-VrpuBlRt06tNy3aI5W5KBtrIidwKPUf69s96vl4&__tn__=-UK-R&c[0]=AT2-goktlqDZqY4huF9V2y4Oy6EWji43j8lG8c8H0HdFjk-n_AKaAMxhe_m5Xe6bCAjV55yzzCb3o_iUbFgNhMoVjDuFtxNiHU9s64b_mCTDMyeIszpYOwk7s5XBVWp9fIpo7d_0yY2cVXB0-eL4i1QzKICZcPy48vO6jH1s0kGrjA) as a Noteworthy Paper and in an [article by Mark LePedus](https://semiengineering.com/manufacturing-bits-oct-26/) published in Semiconductor Engineering.",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/a21ede35278623aa.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt90lc0e_s0t3ps",
+   "dateLabel": "2021/10/25",
+   "sortDate": "2021-10-25",
+   "endDate": "",
+   "title": "",
+   "body": "- Duk-Hyun Choe (50% contribution), Jinseong Heo, Sanghyun Jo has been awarded Grand Award in the Samsung Best Paper Awards.\n- This represents the 1st place in the entire Samsung Group [30M KRW].",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/201c59141a412c26.jpg",
+     "caption": ""
+    },
+    {
+     "src": "/media/f620947c302d951d.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt90kh1x_yhzfgm",
+   "dateLabel": "2021/10/21",
+   "sortDate": "2021-10-21",
+   "endDate": "",
+   "title": "",
+   "body": "- Duk-Hyun Choe (60% contribution) has been awarded the DS Patent Award by Samsung Electronics [5M KRW].",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/dc26ae0e86abd0f0.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt8zq2x1_fc1q9x",
+   "dateLabel": "2021/08/14",
+   "sortDate": "2021-08-14",
+   "endDate": "",
+   "title": "",
+   "body": "- The artwork of our paper \"[Unexpectedly low barrier of ferroelectric switching in HfO2 via topological domain walls](https://doi.org/10.1016/j.mattod.2021.07.022)\" by Duk-Hyun Choe et al. is selected as [Inner Cover](https://www.sciencedirect.com/science/article/pii/S1369702121003965/pdfft?md5=3b01cd05083c9ab628b8061836dabcfd&pid=1-s2.0-S1369702121003965-main.pdf) in Materials Today journal (2021 Impact Factor: 31.04). ",
+   "links": [],
+   "images": [
+    {
+     "src": "/media/a5d4add3305d4133.jpg",
+     "caption": ""
+    }
+   ],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  },
+  {
+   "id": "news_mt8zmrbd_0p2kfg",
+   "dateLabel": "2019/10/01",
+   "sortDate": "2019-10-01",
+   "endDate": "",
+   "title": "New Position: Staff Researcher (CL3)",
+   "body": "- Duk-Hyun Choe joined Samsung Advanced Institute of Technology (SAIT) as a Staff Researcher (CL3).",
+   "links": [],
+   "images": [],
+   "isPublic": true,
+   "addedAt": "",
+   "updatedAt": ""
+  }
+ ]
+}

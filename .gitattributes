@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.woff2 binary
+*.jpg binary
+*.png binary
+*.webp binary
+*.gif binary
+vendor/*.min.js -text
+media/* -text

@@ -1,0 +1,3032 @@
+/* ── Profile page ───────────────────────────────────────────────────────── */
+/* Hide the logged-out sign-in banner for visitors viewing a profile. */
+body.is-page-profile .panel.auth-panel { display: none; }
+
+.profile-page,
+.profile-page button,
+.profile-page input,
+.profile-page select,
+.profile-page textarea {
+  font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+.profile-page {
+  max-width: none;
+  margin: 0;
+  padding: 0 0 40px;
+}
+
+/* ── Profile categories section (bottom panel) ──────────────────────────── */
+.profile-tags-section {
+  margin-top: 24px;
+}
+
+.profile-tags-section .chip.is-active-filter {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.profile-tag-form { align-items: center; }
+.profile-tag-input-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+.profile-tag-input-wrap > input {
+  flex: 1 1 auto;
+  width: 100%;
+  padding-right: 28px;
+}
+
+/* Header — matches Library .panel */
+.profile-header {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+  transition: background-color 0.15s;
+}
+
+/* Collapsed, the whole card is the expand target (js/pages/profile.js). */
+.profile-header.is-collapsed { cursor: pointer; }
+@media (hover: hover) {
+  .profile-header.is-collapsed:hover { background-color: var(--profile-card-hover); }
+}
+
+/* Avatar (left) + identity / extra (right). Avatar spans both right-column
+   rows so it stays vertically centered against the whole body on desktop. */
+.profile-header-main {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "avatar identity"
+    "avatar extra";
+  align-items: center;
+  column-gap: 18px;
+}
+.profile-avatar       { grid-area: avatar; }
+.profile-identity     { grid-area: identity; min-width: 0; }
+.profile-header-extra { grid-area: extra;   min-width: 0; }
+
+.profile-avatar {
+  position: relative;
+  flex-shrink: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 26px;
+  overflow: hidden;
+}
+.profile-avatar.is-empty {
+  background: rgba(0, 0, 0, 0.03);
+}
+.profile-avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-avatar-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--muted);
+  opacity: 0.4;
+}
+.profile-avatar-ph svg {
+  width: 62%;
+  height: 62%;
+}
+.profile-avatar-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 5px 6px 4px;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+/* Hover reveal only on hover-capable devices, so a tap on touch doesn't
+   leave the caption stuck (touch has no un-hover). */
+@media (hover: hover) {
+  .profile-avatar.has-caption:hover .profile-avatar-caption {
+    opacity: 1;
+  }
+}
+/* Tap toggle: works on every device, dismissable by tapping again. */
+.profile-avatar.has-caption.is-caption-open .profile-avatar-caption {
+  opacity: 1;
+}
+.profile-avatar.has-caption {
+  cursor: pointer;
+}
+body.dark-mode .profile-avatar.is-empty {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Edit form: photo upload row */
+.profile-photo-edit {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+.profile-photo-edit-preview {
+  position: relative;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.04);
+}
+.profile-photo-edit-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+body.dark-mode .profile-photo-edit-preview {
+  background: rgba(255, 255, 255, 0.08);
+}
+.profile-photo-edit-controls {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.profile-photo-edit-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.profile-photo-remove-btn {
+  background: transparent;
+  border: none;
+  padding: 4px 2px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.profile-photo-remove-btn:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+.profile-field-optional {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.85em;
+}
+
+/* Crop modal */
+.avatar-crop-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+}
+.avatar-crop-modal {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  max-width: 92vw;
+}
+.avatar-crop-title {
+  margin-bottom: 12px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text);
+}
+.avatar-crop-stage {
+  display: flex;
+  justify-content: center;
+}
+.avatar-crop-viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #000;
+  touch-action: none;
+  cursor: grab;
+}
+.avatar-crop-viewport:active {
+  cursor: grabbing;
+}
+.avatar-crop-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+  will-change: transform;
+}
+.avatar-crop-mask {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 18px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+.avatar-crop-hint {
+  margin: 10px 0 6px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+}
+.avatar-crop-zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.avatar-crop-zoom-range {
+  flex: 1;
+}
+.avatar-crop-zoom-ico {
+  color: var(--muted);
+  font-size: 1.1rem;
+  width: 14px;
+  text-align: center;
+}
+.avatar-crop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.profile-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.profile-name-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-handle {
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 400;
+  opacity: 0.75;
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s, color 0.15s;
+}
+.profile-handle:hover {
+  opacity: 1;
+  color: var(--text);
+  text-decoration: underline;
+}
+
+/* Chevron buttons — expand (header, collapsed only) and collapse (footer). */
+.profile-chevron-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--muted);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s, opacity 0.15s;
+  flex-shrink: 0;
+}
+/* Collapsed, the chevron is a hint rather than the only way in — it fades back
+   until the card (or the button itself) is hovered. */
+.profile-header.is-collapsed .profile-chevron-btn { opacity: 0.4; }
+@media (hover: hover) {
+  .profile-header.is-collapsed:hover .profile-chevron-btn { opacity: 1; }
+}
+.profile-chevron-btn:hover {
+  opacity: 1;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.05);
+}
+body.dark-mode .profile-chevron-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-bio {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Rendered by richtext.js into .rt-* blocks, so no pre-wrap here — it would
+   double the spacing the paragraph and list margins already provide. */
+.profile-about {
+  margin: 8px 0 0;
+  padding: 0;
+  color: var(--text);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  word-wrap: break-word;
+  max-width: 100%;
+}
+.profile-about > :last-child { margin-bottom: 0; }
+.profile-about a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+
+.profile-bio-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.profile-affiliation {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Expanded section */
+.profile-expanded {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+
+/* Pen/edit icon button — identical to .paper-edit in library */
+.profile-edit-icon-btn {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 0;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--accent-soft);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  flex-shrink: 0;
+}
+.profile-edit-icon-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: 60% 60%;
+  mask-size: 60% 60%;
+}
+.profile-edit-icon-btn:hover {
+  background: var(--chip);
+  color: var(--accent-dark);
+  border-color: var(--line-strong);
+}
+body.dark-mode .profile-edit-icon-btn {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.profile-more {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-more-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.profile-links-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+/* In the header the row replaces the old stats line. The negative left margin
+   cancels the icon buttons' internal padding so the glyphs line up with the
+   name and headline above them. */
+.profile-header-extra .profile-links-row {
+  margin: 2px 0 0 -6px;
+}
+
+.profile-link-anchor {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.profile-link-anchor:hover {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.profile-link-row {
+  display: flex;
+  gap: 10px;
+  font-size: 0.85rem;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.profile-link-label {
+  min-width: 72px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.profile-link-row a {
+  color: var(--accent-dark);
+  word-break: break-all;
+}
+
+.profile-more-empty {
+  color: var(--muted);
+  font-style: italic;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.profile-private-notice {
+  color: var(--muted);
+  font-style: italic;
+  text-align: center;
+  padding: 40px 16px;
+  font-size: 0.95rem;
+}
+
+/* Edit form */
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-field-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.profile-field input,
+.profile-field textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.92rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.profile-field--error input,
+.profile-field--error textarea,
+.profile-field--error select {
+  border-color: #d94a4a !important;
+  box-shadow: 0 0 0 2px rgba(217, 74, 74, 0.15);
+}
+.profile-field--error .profile-field-label {
+  color: #d94a4a;
+}
+
+.profile-field input:focus,
+.profile-field textarea:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.profile-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Tabs — clean underline style */
+.profile-tabs.segmented-control {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  display: grid !important;
+  width: 100%;
+  margin-bottom: 0;
+  padding: 0;
+  border: none;
+  border-radius: 24px 24px 0 0;
+  background: var(--panel);
+  gap: 0;
+  overflow: hidden;
+  transition: grid-template-columns 0.18s ease;
+}
+
+/* Desktop: keep tabs evenly split — no widening of the active tab. */
+
+.profile-tabs .segmented-control-button {
+  font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  border-radius: 0;
+  padding: 12px 12px 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  box-shadow: none !important;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.profile-tabs .segmented-control-button:hover {
+  color: var(--text);
+  background: transparent;
+}
+
+.profile-tabs .segmented-control-button.is-active {
+  color: var(--accent-dark);
+  background: transparent;
+  border-bottom-color: var(--accent-dark);
+  box-shadow: none !important;
+}
+
+.profile-tab-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.profile-tab-label-full { display: inline; }
+.profile-tab-label-short { display: none; }
+
+.profile-tab-add-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1;
+  background: transparent;
+  color: var(--accent-dark);
+  border: 0;
+  cursor: pointer;
+  user-select: none;
+  flex: 0 0 auto;
+  transition: background-color 0.15s;
+}
+.profile-tab-add-btn.is-open {
+  transform: rotate(45deg);
+}
+.profile-tab-add-btn:hover {
+  background: var(--chip);
+}
+.profile-tab-add-btn:focus-visible {
+  outline: 2px solid var(--accent-dark);
+  outline-offset: 2px;
+}
+
+/* ── Toolbar (sort + filter) ───────────────────────────────────────────────── */
+.profile-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--line);
+  margin-bottom: 0;
+  background: var(--panel);
+  font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+
+.profile-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.profile-toolbar-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-right: 2px;
+}
+
+.profile-toolbar-sep {
+  color: var(--muted);
+  opacity: 0.4;
+  font-size: 0.85rem;
+  margin: 0 1px;
+  align-self: center;
+}
+
+.profile-sort-btn,
+.profile-filter-btn {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-2, var(--muted));
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+  white-space: nowrap;
+}
+
+.profile-sort-btn:hover,
+.profile-filter-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.profile-sort-btn.is-active,
+.profile-filter-btn.is-active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+body.dark-mode .profile-sort-btn.is-active,
+body.dark-mode .profile-filter-btn.is-active {
+  color: var(--bg);
+}
+
+/* ── Pub-view-prefs explicit Save link ──────────────────────────────────────── */
+.profile-pub-save-link {
+  background: none;
+  border: 0;
+  padding: 0 2px;
+  margin: 0 2px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+  white-space: nowrap;
+  animation: profile-pub-save-appear 180ms ease-out;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+.profile-pub-save-link:hover { opacity: 0.75; }
+.profile-pub-save-link.is-saving {
+  pointer-events: none;
+  text-decoration: none;
+  animation: profile-pub-save-confirm 500ms ease-out forwards;
+}
+
+@keyframes profile-pub-save-appear {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes profile-pub-save-confirm {
+  0%   { opacity: 1; transform: scale(1); }
+  30%  { transform: scale(1.08); }
+  100% { opacity: 0; transform: scale(0.95); }
+}
+
+/* ── Year section headers ──────────────────────────────────────────────────── */
+.profile-year-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+  letter-spacing: normal;
+  text-transform: none;
+  padding: 14px 12px 6px;
+  margin-top: 0;
+  background: var(--panel);
+  border-bottom: none;
+}
+
+.profile-year-header:first-child {
+  padding-top: 14px;
+}
+
+/* Year header already provides visual separation — no extra rule needed */
+
+/* ── Paper list — horizontal bars ─────────────────────────────────────────── */
+.profile-paper-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Single-column, horizontal bar style */
+.profile-paper-card.paper-card {
+  grid-template-columns: minmax(0, 1fr) !important;
+  border-radius: 0 !important;
+  border: none !important;
+  border-top: none !important;
+  box-shadow: none !important;
+  background: var(--panel) !important;
+  padding: 14px 6px 14px 6px !important;
+  transition: background 0.1s;
+  position: relative;
+}
+
+/* Divider only under section headers — not between papers in the same group */
+.profile-year-header + .profile-paper-card.paper-card {
+  border-top: 1px solid var(--line) !important;
+}
+
+/* Desktop: topline wrapper is transparent */
+.topline-info {
+  display: contents;
+}
+
+.profile-paper-card .paper-quick-actions {
+  left: -4px;
+  width: 40px;
+}
+
+/* Paper numbering — sits above epaulette in .paper-quick-actions */
+.profile-paper-number {
+  width: 100%;
+  text-align: center;
+  font-family: "Harding", "PT Serif", Georgia, serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  pointer-events: none;
+  line-height: 1;
+  padding-top: 4px;
+  order: -1;
+}
+
+@media (hover: hover) {
+  .profile-paper-card.paper-card:hover {
+    background: var(--profile-card-hover) !important;
+  }
+}
+
+.profile-paper-card.paper-card.is-expanded {
+  background: var(--profile-card-hover) !important;
+  box-shadow: inset 1px 0 0 var(--accent) !important;
+}
+
+.profile-paper-card.paper-card.is-selected {
+  background: var(--panel-strong) !important;
+  box-shadow: inset 3px 0 0 var(--accent) !important;
+  border: none !important;
+}
+
+body.dark-mode .profile-paper-card.paper-card.is-selected {
+  background: var(--panel-strong) !important;
+}
+
+/* Keep left padding for epaulette gutter, only reset right */
+.profile-paper-card .paper-main {
+  padding-right: 0 !important;
+}
+
+.profile-paper-card .paper-title {
+  font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  margin: 0;
+}
+
+.profile-paper-card .paper-authors {
+  font-size: 15px;
+  margin: 0;
+}
+
+.profile-paper-card .paper-journal {
+  font-size: 15px;
+}
+
+.profile-paper-card .paper-journal {
+  font-family: "Harding", "PT Serif", Georgia, serif;
+  font-style: italic;
+}
+
+.profile-paper-card .paper-year {
+  font-family: "Harding", "PT Serif", Georgia, serif;
+}
+
+/* ── Mobile-only number in topline (hidden on desktop) ───────────────────── */
+.profile-paper-number-mobile {
+  display: none;
+}
+
+/* ── My name highlight in author list ─────────────────────────────────────── */
+.profile-my-author {
+  font-weight: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  color: inherit;
+}
+.profile-my-author sup {
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* ── Clickable authors in expanded card ─────────────────────────────────── */
+.profile-author-clickable {
+  cursor: pointer;
+  transition: color 0.12s;
+  border-radius: 2px;
+  padding: 0 2px;
+  margin: 0 -2px;
+}
+.profile-author-clickable:hover {
+  color: var(--accent);
+}
+body.dark-mode .profile-author-clickable:hover {
+  color: var(--accent-light, #a8c4f0);
+}
+body.mint-mode .profile-author-clickable:hover {
+  color: var(--accent-dark, #1a5276);
+}
+
+.profile-author-clickable.is-clicked {
+  background: rgba(255, 213, 79, 0.38);
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+body.dark-mode .profile-author-clickable.is-clicked {
+  background: rgba(255, 213, 79, 0.24);
+}
+body.mint-mode .profile-author-clickable.is-clicked {
+  background: rgba(46, 139, 87, 0.2);
+}
+
+/* ── Author superscripts (dagger † for co-1st, asterisk * for corresponding) */
+.author-dagger, .author-asterisk {
+  font-size: 0.72em;
+  font-weight: 700;
+  color: var(--muted);
+  margin-left: 1px;
+  position: relative;
+  top: -0.45em;
+  vertical-align: baseline;
+  line-height: 0;
+}
+
+/* ── Author popover (me / co-1st / ✉) + Citation popover (this / all) ──── */
+.profile-author-popover,
+.profile-citation-popover {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  gap: 4px;
+  padding: 4px 6px;
+  background: var(--panel, #fff);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  animation: author-pop-in 0.12s ease-out;
+}
+.profile-author-popover::before,
+.profile-citation-popover::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: var(--popover-arrow-x, 50%);
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: var(--line);
+  border-top: 0;
+}
+.profile-author-popover button,
+.profile-citation-popover button {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 13px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-2, var(--muted));
+  cursor: pointer;
+  transition: border-color 0.1s, color 0.1s, background 0.1s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.profile-author-popover button:hover,
+.profile-citation-popover button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.profile-author-popover button.is-active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+body.dark-mode .profile-author-popover,
+body.dark-mode .profile-citation-popover {
+  background: var(--panel, #1e1e1e);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+body.mint-mode .profile-author-popover,
+body.mint-mode .profile-citation-popover {
+  background: var(--panel, #f0f7f0);
+}
+@keyframes author-pop-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.profile-author-ellipsis {
+  color: var(--muted);
+  letter-spacing: 1px;
+  font-weight: 400;
+}
+
+/* ── Citation badge on topline (clickable button) ─────────────────────────── */
+.profile-citation-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--panel-2, var(--bg));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1px 7px;
+  margin-left: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.profile-citation-badge:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.profile-citation-badge:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* ── Inline authorship editing ────────────────────────────────────────────── */
+.profile-authorship-inline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+
+.profile-cycle-btn {
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-2, var(--muted));
+  transition: border-color 0.1s, color 0.1s;
+}
+
+.profile-cycle-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+/* ── Selected publication button ──────────────────────────────────────────── */
+.profile-select-btn {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.1s;
+}
+
+.profile-select-btn:hover {
+  color: var(--accent);
+}
+
+.profile-select-btn.is-selected {
+  color: var(--accent, #2980b9);
+}
+
+.profile-select-btn svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.paper-meta .profile-select-btn {
+  padding-right: 0;
+  margin-right: -4px;
+}
+
+/* ── Extra links row ──────────────────────────────────────────────────────── */
+.paper-extra-links {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  align-items: center;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+.paper-extra-link-chip {
+  font-size: 0.8rem;
+  color: var(--danger-fg);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 1px 2px;
+}
+
+.paper-extra-link-chip:hover { text-decoration: underline; }
+
+.paper-extra-link-remove {
+  margin-left: -4px;
+  margin-right: 4px;
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.paper-extra-link-remove:hover { color: var(--danger-fg); }
+
+.paper-extra-link-add {
+  background: transparent;
+  border: 1px dashed var(--line);
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.paper-extra-link-add:hover { color: var(--accent-dark); border-color: var(--accent); }
+
+.paper-extra-links-add-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 6px;
+}
+
+/* ── Edit button in meta row — reuse library icon styling ────────────────── */
+
+/* ── Profile category chips (read-only on expanded cards) ────────────────── */
+.profile-tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-top: 8px;
+}
+.profile-tag-chip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-2, var(--muted));
+  background: var(--panel-2, var(--bg));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1px 8px;
+  line-height: 1.6;
+}
+.profile-tag-chip.is-editable {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.profile-tag-chip-remove {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.profile-tag-chip-remove:hover {
+  color: var(--danger-fg);
+}
+
+/* ── Inline edit form ────────────────────────────────────────────────────── */
+.profile-edit-form-inline {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.profile-edit-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.profile-edit-row {
+  display: flex;
+  gap: 8px;
+}
+.profile-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.profile-edit-field-sm {
+  flex: 0 0 100px;
+}
+.profile-edit-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.profile-edit-form-inline input,
+.profile-edit-form-inline textarea,
+.profile-edit-form-inline select {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.12s;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+.profile-edit-form-inline input:focus,
+.profile-edit-form-inline textarea:focus,
+.profile-edit-form-inline select:focus {
+  border-color: var(--accent);
+}
+.profile-edit-form-inline textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+.profile-edit-form-inline textarea[data-autosize] {
+  overflow: hidden;
+}
+.profile-edit-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.profile-edit-tag-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  min-height: 24px;
+}
+.profile-edit-tag-chips:empty {
+  display: none;
+}
+.profile-edit-tag-add {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.profile-edit-tag-add select {
+  flex: 1;
+  min-width: 0;
+}
+.profile-edit-tag-add input {
+  flex: 1;
+  min-width: 0;
+}
+.profile-edit-tag-add button {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+}
+.profile-edit-actions-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+}
+.profile-edit-actions-row button {
+  padding: 6px 16px;
+  font-size: 0.84rem;
+  border-radius: 8px;
+}
+
+/* ── Selected/Full toggle ─────────────────────────────────────────────────── */
+.profile-pub-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.profile-pub-toggle input[type="checkbox"] {
+  display: none;
+}
+
+.profile-pub-toggle-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+
+.profile-pub-toggle-label.is-active {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-pub-toggle-track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  background: var(--line);
+  border-radius: 9px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.profile-pub-toggle input:checked ~ .profile-pub-toggle-track {
+  background: var(--accent);
+}
+
+/* Thumb color follows the inverse-contrast pattern in every mode:
+   - Track light  → thumb dark   (unchecked in light/mint, checked in dark)
+   - Track dark   → thumb light  (checked in light/mint, unchecked in dark) */
+.profile-pub-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: var(--muted);
+  border-radius: 50%;
+  transition: transform 0.15s, background 0.15s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.profile-pub-toggle input:checked ~ .profile-pub-toggle-track .profile-pub-toggle-thumb {
+  transform: translateX(14px);
+  background: #fff;
+}
+
+body.dark-mode .profile-pub-toggle-thumb {
+  background: #ece6d8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+body.dark-mode .profile-pub-toggle input:checked ~ .profile-pub-toggle-track .profile-pub-toggle-thumb {
+  background: var(--bg);
+}
+
+/* ── Achievement link in stats row ──────────────────────────────────────── */
+@keyframes profile-achv-shimmer {
+  0%, 100% { background-position: 200% center; }
+  50%      { background-position: -200% center; }
+}
+.profile-achievement-link {
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--accent) 35%,
+    color-mix(in srgb, var(--accent) 40%, transparent) 50%,
+    var(--accent) 65%,
+    var(--accent) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: profile-achv-shimmer 4.5s ease-in-out infinite;
+  border: none;
+  padding: 2px 2px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+}
+body.dark-mode .profile-achievement-link {
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--accent) 35%,
+    color-mix(in srgb, var(--accent) 40%, transparent) 50%,
+    var(--accent) 65%,
+    var(--accent) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-achievement-link {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: var(--accent);
+  }
+  body.dark-mode .profile-achievement-link {
+    animation: none;
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: var(--accent);
+  }
+}
+
+
+/* ── Achievement modal ───────────────────────────────────────────────────── */
+.profile-achievement-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.profile-achievement-modal {
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px 28px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: var(--shadow);
+}
+
+.profile-achievement-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.profile-achievement-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profile-achievement-close {
+  background: transparent;
+  border: none;
+  font-size: 1.4rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.profile-achievement-close:hover {
+  color: var(--text);
+}
+
+.profile-achievement-body {
+  color: var(--text-2, var(--muted));
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.profile-achievement-body p {
+  margin: 0;
+}
+
+body.dark-mode .profile-achievement-overlay {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* ── Empty state ───────────────────────────────────────────────────────────── */
+.profile-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  background: var(--panel);
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+
+.profile-empty-coming-soon {
+  padding: 56px 24px;
+}
+.profile-empty-coming-soon-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.profile-empty-coming-soon-desc {
+  margin: 0 auto;
+  max-width: 360px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ── Mobile ≤700px ─────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  /* Pull the page out of `.app-shell { padding: 10px 8px 32px }` so the
+     tabs / toolbar / paper list run edge-to-edge. Header and tags panel
+     are re-inset below to keep their card silhouette. */
+  .profile-page {
+    margin: 0 -8px;
+    padding: 0 0 40px;
+  }
+  .profile-page > .profile-header { margin: 0 8px; }
+  .profile-page > .profile-tags-section { margin-left: 8px; margin-right: 8px; }
+
+  /* Square top corners on the tab bar — looks cleaner edge-to-edge on
+     mobile where the page already runs flush to the viewport.
+     Publications tab shows the short label "Publications" on mobile so both
+     tabs fit evenly without ellipsis-truncation. */
+  .profile-tabs.segmented-control {
+    border-radius: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .profile-tab-label-full { display: none; }
+  .profile-tab-label-short { display: inline; }
+
+  .profile-header {
+    padding: 16px 14px;
+    border-radius: 12px;
+  }
+
+  .profile-header-main {
+    /* Avatar aligns to name+affiliation only; headline (extra) drops to a
+       full-width row below the photo. */
+    grid-template-areas:
+      "avatar identity"
+      "extra  extra";
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 6px;
+  }
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+  }
+
+  .profile-name {
+    font-size: 1.2rem;
+  }
+
+  .profile-link-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .profile-link-label {
+    min-width: 0;
+  }
+
+  .profile-visibility-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+  .profile-visibility-row .profile-link-label {
+    flex: 0 0 auto;
+  }
+  .profile-visibility-row .profile-visibility-inline {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+
+  .profile-tag-form {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+  .profile-tag-form > .profile-tag-input-wrap { flex: 1 1 auto; }
+  .profile-tag-form > button[type="submit"] { flex: 0 0 auto; }
+
+  .profile-achievement-modal {
+    padding: 20px 18px;
+  }
+
+  .profile-toolbar {
+    gap: 6px 8px;
+    /* Match the 14px text inset on paper cards so "Selected" doesn't
+       pin to the viewport edge after the page went edge-to-edge. */
+    padding: 8px 14px 10px;
+  }
+
+  /* ── Mobile: hide Sort/Position labels ──────────────────────── */
+  .profile-toolbar-label { display: none; }
+
+  /* ── Mobile: hide epaulette toggle + epaulettes ─────────────── */
+  .profile-toolbar [data-epaulette-toggle] {
+    display: none !important;
+  }
+  .profile-paper-card .my-epaulette,
+  .profile-paper-card .my-epaulette-h {
+    display: none !important;
+  }
+
+  /* ── Mobile: remove top padding, equalize with bottom ────────── */
+  /* Card runs edge-to-edge now that .profile-page is unwrapped from
+     the .app-shell padding. Desktop sets `margin: 0 -10px` on the
+     card to compensate for list padding — on mobile there's no list
+     padding so we zero that out too. Card padding 8px + paper-main
+     padding 6px puts the title ~14px from the viewport edge,
+     matching the pre-edge-to-edge layout. */
+  .profile-paper-card.paper-card {
+    padding: 10px 8px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .profile-paper-card .paper-main {
+    padding-top: 0 !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    row-gap: 0 !important;
+  }
+  .profile-paper-card .paper-topline {
+    margin: 0;
+  }
+  .profile-paper-card .paper-title {
+    margin: 6px 0 0 !important;
+  }
+  .profile-paper-card .paper-authors {
+    margin: 6px 0 0 !important;
+  }
+  /* Hide desktop quick-actions gutter (number, epaulette) when collapsed */
+  .profile-paper-card.paper-card:not(.is-expanded) .paper-quick-actions {
+    display: none !important;
+  }
+
+  /* ── Mobile: inline number in topline ────────────────────────── */
+  .profile-paper-number-mobile {
+    display: inline !important;
+    font-family: "Harding", "PT Serif", Georgia, serif;
+    font-size: 0.88rem;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    margin-right: 4px;
+    flex-shrink: 0;
+  }
+
+  /* ── Mobile: title + authors indent to align with journal ────── */
+  .profile-paper-card .paper-title,
+  .profile-paper-card .paper-authors {
+    padding-left: var(--mobile-num-indent, 0px);
+  }
+
+  /* ── Mobile: hide month in year label ────────────────────────── */
+  .profile-paper-card .paper-year-month {
+    display: none;
+  }
+
+  /* ── Mobile: hide year badge when year-sorted (headers already show year) */
+  .profile-paper-list.year-sorted:not(.selected-only) .profile-paper-card .paper-topline .paper-year {
+    display: none;
+  }
+
+  /* ── Mobile: topline — flex stays in both states, no layout shift ─ */
+  .profile-paper-card .paper-topline {
+    flex-wrap: nowrap !important;
+    align-items: baseline;
+    gap: 6px !important;
+  }
+  .profile-paper-card .profile-citation-badge {
+    flex-shrink: 0;
+  }
+
+  /* Info wrapper (number + type + journal) = single flex-item.
+     year is now a direct topline sibling, always left of the Cited badge. */
+  .profile-paper-card .topline-info {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .profile-paper-card .topline-info .paper-journal {
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .profile-paper-card .topline-info .paper-type {
+    flex-shrink: 0;
+  }
+  /* year sits between topline-info and badge in topline flex row */
+  .profile-paper-card .paper-topline .paper-year {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* Expanded: keep flex, allow journal text to wrap inside its box */
+  .profile-paper-card.is-expanded .topline-info {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+  .profile-paper-card.is-expanded .topline-info .paper-journal {
+    flex: 1 1 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  /* ── Mobile: expanded card spacing ──────────────────────────── */
+  .profile-paper-card.is-expanded .paper-affiliations {
+    padding-left: var(--mobile-num-indent, 0px);
+    margin-top: 10px !important;
+  }
+  .profile-paper-card.is-expanded .paper-summary {
+    margin-top: 12px !important;
+  }
+
+  /* ── Mobile: hide "Update metadata" link on paper cards ─────── */
+  .profile-paper-card .paper-refresh-link {
+    display: none !important;
+  }
+
+  /* ── Mobile: hide desktop number in quick-actions (avoid double) */
+  .profile-paper-card .paper-quick-actions .profile-paper-number {
+    display: none !important;
+  }
+
+  /* ── Mobile: shrink tab button font if label is long ────────── */
+  .profile-tabs .segmented-control-button {
+    font-size: 0.78rem;
+    padding: 12px 4px 10px;
+    white-space: nowrap;
+    gap: 8px;
+  }
+
+  .profile-tab-add-btn {
+    width: 16px;
+    height: 16px;
+    font-size: 0.95rem;
+  }
+
+  /* ── Mobile: edit form adjustments ─────────────────────────── */
+  .profile-edit-row {
+    flex-direction: column;
+  }
+  .profile-edit-field-sm {
+    flex: 1;
+  }
+  .profile-edit-tag-add {
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Narrow desktop: hide month on Selected Publications cards ─ */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .profile-paper-list.selected-only .profile-paper-card .paper-year-month {
+    display: none;
+  }
+}
+
+/* ── Scholar Import (inline inside header) ─────────────────────────────── */
+
+.scholar-import-inline {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.scholar-import-header {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.scholar-import-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.scholar-import-input {
+  flex: 1;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.15s;
+  min-width: 0;
+}
+
+.scholar-import-input:focus {
+  border-color: var(--accent);
+}
+
+.scholar-import-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.scholar-import-btn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: #fff;
+  transition: opacity 0.12s;
+}
+
+.scholar-import-btn.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+body.dark-mode .scholar-import-btn,
+body.dark-mode .scholar-import-btn.primary {
+  color: var(--bg);
+}
+
+.scholar-import-btn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.scholar-import-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.scholar-import-error {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--danger-fg);
+}
+
+.scholar-progress-log {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.scholar-progress-step {
+  font-size: 0.82rem;
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scholar-progress-step.is-done {
+  color: var(--text-3, var(--text-2));
+  opacity: 0.6;
+}
+
+.scholar-progress-step.is-active {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.scholar-preview-author {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.scholar-preview-author strong {
+  font-size: 0.95rem;
+}
+
+.scholar-preview-stats {
+  font-size: 0.8rem;
+  color: var(--text-2);
+}
+
+.scholar-preview-counts {
+  font-size: 0.84rem;
+  margin-bottom: 12px;
+}
+
+.scholar-count-new {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.scholar-count-existing {
+  color: var(--text-2);
+}
+
+.scholar-import-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.scholar-cancel-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+  font-size: 0.84rem;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--text-2);
+  transition: color 0.12s;
+}
+
+.scholar-cancel-btn:hover {
+  color: var(--text);
+}
+
+.scholar-import-status,
+.scholar-import-done {
+  font-size: 0.84rem;
+  color: var(--text-2);
+  margin: 4px 0;
+}
+
+.scholar-import-done {
+  color: var(--green, #2ecc71);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 700px) {
+  .scholar-import-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .scholar-import-input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .scholar-import-btn {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0 14px;
+  }
+}
+
+/* scholar-quick-btn now matches primary style for consistency */
+.scholar-quick-btn {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+.scholar-quick-btn:hover:not(:disabled) {
+  opacity: 0.88;
+  background: var(--accent);
+}
+
+.scholar-verified-btn {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
+@media (max-width: 700px) {
+  .scholar-quick-btn,
+  .scholar-verified-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* ── Add paper tabs + section ─────────────────────────────────────────────── */
+.profile-add-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.profile-add-tab {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+}
+
+.profile-add-tab:hover {
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+body.dark-mode .profile-add-tab:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.profile-add-tab.is-active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* ── PDF link state (owner-only click) ───────────────────────────────────── */
+.paper-pdf-link.is-missing.is-readonly {
+  cursor: default;
+  opacity: 0.65;
+  text-decoration: none;
+}
+.paper-pdf-link.is-missing.is-readonly:hover {
+  text-decoration: none;
+  color: var(--muted);
+}
+.paper-pdf-link.is-missing.is-clickable {
+  cursor: pointer;
+}
+
+/* ── Talk card tweaks (mirror paper card) ────────────────────────────────── */
+.profile-talk-card .paper-quick-actions { display: none; }
+.profile-talk-location {
+  color: var(--muted);
+  font-weight: 400;
+}
+.profile-talk-venue-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+.profile-talk-venue-link:hover {
+  text-decoration: underline;
+}
+.profile-talk-card.is-collapsed { cursor: pointer; }
+.profile-talk-card.is-collapsed .paper-authors,
+.profile-talk-card.is-collapsed .paper-summary,
+.profile-talk-card.is-collapsed .paper-meta,
+.profile-talk-card.is-collapsed .profile-talk-context-meta { display: none; }
+
+/* When expanded, location and date move to the context meta line under the title,
+   so hide their topline duplicates. Venue + type stay on the topline. */
+.profile-talk-card.is-expanded .profile-talk-location,
+.profile-talk-card.is-expanded .paper-year { display: none; }
+
+/* Mobile collapsed: keep topline tight — type + venue only. */
+@media (max-width: 700px) {
+  .profile-talk-card.is-collapsed .profile-talk-location,
+  .profile-talk-card.is-collapsed .paper-year { display: none; }
+  /* Italic glyph at the rightmost edge overhangs its content box; without
+     a tiny right pad, the parent .paper-topline overflow:hidden shaves it. */
+  .profile-talk-card.is-collapsed .paper-journal {
+    padding-right: 2px;
+  }
+}
+
+.profile-talk-context-meta {
+  margin: 4px 0 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.profile-talk-context-sep {
+  margin: 0 2px;
+  color: var(--line);
+}
+.profile-talk-inviter-label {
+  color: var(--muted);
+}
+.profile-talk-context-meta a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.profile-talk-context-meta a:hover {
+  text-decoration: underline;
+}
+
+.profile-field-optional {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.78rem;
+  margin-left: 4px;
+}
+
+/* ── Add paper (individual) ──────────────────────────────────────────────── */
+.profile-add-paper-btn {
+  margin-top: 12px;
+  background: transparent;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.profile-add-paper-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.profile-add-paper-options {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.profile-add-paper-option {
+  background: transparent;
+  border: 1px dashed var(--line);
+  border-radius: 18px;
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.profile-add-paper-option:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.profile-add-paper-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.profile-add-paper-footer {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.profile-add-paper-preview {
+  padding: 10px 0;
+}
+
+.profile-add-preview-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.profile-add-preview-meta {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.profile-add-manual-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.profile-add-manual-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.profile-add-manual-row--three {
+  grid-template-columns: 1fr 1.5fr 1fr;
+}
+
+@media (max-width: 700px) {
+  /* Inset add-form contents from viewport edges so labels and inputs
+     don't pin to the screen edge after .profile-page goes edge-to-edge.
+     14px matches the inset used by .profile-toolbar (line ~1333). */
+  .profile-add-paper-section {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .profile-add-manual-row {
+    grid-template-columns: 1fr;
+  }
+  .profile-add-paper-options {
+    flex-direction: column;
+  }
+}
+
+/* ── Profile card: edit/delete icons in meta row ───────────────────────── */
+.profile-paper-card .paper-meta .paper-edit,
+.profile-paper-card .paper-meta .paper-delete {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.profile-paper-card .paper-meta .paper-edit {
+  margin-left: auto;
+}
+.profile-paper-card .paper-meta .paper-delete {
+  margin-left: 4px;
+}
+
+/* ── Profile card: Authorship toggle ─────────────────────────────────────── */
+.profile-authorship-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--muted, #888);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+
+.profile-ismine-toggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.profile-ismine-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.profile-ismine-track {
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+  border-radius: 9px;
+  background: var(--line, #ccc);
+  position: relative;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.profile-ismine-toggle input:checked + .profile-ismine-track {
+  background: var(--accent, #b07a4a);
+}
+
+.profile-ismine-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: left 0.15s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.profile-ismine-toggle input:checked + .profile-ismine-track .profile-ismine-thumb {
+  left: 15px;
+}
+
+/* Library link in meta row */
+.profile-lib-link {
+  color: var(--accent, #b07a4a);
+}
+.profile-lib-link:hover { text-decoration: underline; }
+
+/* ── Empty-state CTA (no publications) ──────────────────────────────────── */
+.profile-empty-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+}
+
+.profile-empty-cta-icon {
+  color: var(--accent);
+  opacity: 0.65;
+  margin-bottom: 14px;
+}
+
+.profile-empty-cta-title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.profile-empty-cta-desc {
+  margin: 0 0 20px;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  max-width: 320px;
+  color: var(--muted);
+}
+
+.profile-empty-cta-btn {
+  font-size: 0.88rem;
+  padding: 10px 22px;
+  border-radius: 10px;
+}
+
+/* Mobile: tighten Name↔Affiliation */
+@media (max-width: 700px) {
+  .profile-header-top {
+    margin-bottom: 2px;
+  }
+  .profile-affiliation {
+    margin: 0;
+    font-size: 0.85rem;
+  }
+}
+
+/* ── Public profile view (read-only) ─────────────────────────────────────── */
+.profile-public {
+  max-width: 880px;
+}
+.profile-public-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+.profile-public-empty-msg {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 10px 0;
+}
+.profile-loading {
+  color: var(--muted);
+  padding: 40px 0;
+  text-align: center;
+}
+
+/* ── Skeleton loaders ─────────────────────────────────────────────────────────
+   Used while /api/profile/me + papers + tags (owner view) or
+   /api/profiles/{slug} (public view) are in flight. Shimmer animation gives
+   the page a "drawing in" feeling instead of a blank "Loading…" flash on
+   slow links. */
+@keyframes profile-skel-shimmer {
+  0%   { background-position: -300px 0; }
+  100% { background-position:  300px 0; }
+}
+.profile-skel {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--chip) 0%,
+    var(--line-strong) 50%,
+    var(--chip) 100%
+  );
+  background-size: 600px 100%;
+  animation: profile-skel-shimmer 1.4s linear infinite;
+  border-radius: 6px;
+}
+.profile-skel-list { display: block; }
+.profile-skel-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile-skel-card .profile-skel-title      { height: 18px; width: 78%; }
+.profile-skel-card .profile-skel-byline     { height: 12px; width: 60%; }
+.profile-skel-card .profile-skel-meta       { height: 12px; width: 38%; }
+
+.profile-skel-public { display: block; }
+.profile-skel-public .profile-skel-header {
+  display: flex;
+  gap: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.profile-skel-public .profile-skel-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.profile-skel-public .profile-skel-header-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+.profile-skel-public .profile-skel-name        { height: 22px; width: 45%; }
+.profile-skel-public .profile-skel-affiliation { height: 14px; width: 70%; }
+.profile-skel-public .profile-skel-stats       { height: 12px; width: 35%; }
+.profile-skel-public .profile-skel-tabs {
+  height: 38px;
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+@media (max-width: 700px) {
+  .profile-skel-public .profile-skel-header { margin: 0 8px 12px; }
+  .profile-skel-public .profile-skel-avatar { width: 60px; height: 60px; }
+}
+.profile-public-header {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.profile-public-header-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.profile-public-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.profile-public-header-main {
+  flex: 1;
+  min-width: 0;
+}
+.profile-public-handle {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-top: 2px;
+}
+.profile-public-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+.profile-public-link {
+  font-size: 0.9rem;
+  color: var(--accent);
+}
+.profile-public-share-btn {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-size: 0.88rem;
+  cursor: pointer;
+  color: var(--text);
+}
+.profile-public-share-btn:hover {
+  background: var(--hover-bg);
+}
+.profile-public-section {
+  margin-top: 28px;
+}
+.profile-public-section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.profile-public-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile-public-card {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg, transparent);
+}
+.profile-public-card-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+  line-height: 1.35;
+}
+.profile-public-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.profile-public-card-title a:hover {
+  text-decoration: underline;
+}
+.profile-public-card-authors,
+.profile-public-card-meta {
+  font-size: 0.86rem;
+  color: var(--muted);
+  margin: 2px 0;
+}
+.profile-public-achievements {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.profile-public-achievement {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+}
+.profile-public-achievement-tier {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.profile-public-achievement-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+@media (max-width: 700px) {
+  .profile-public-header-row {
+    flex-wrap: wrap;
+  }
+  .profile-public-share-btn {
+    order: 3;
+    margin-left: auto;
+  }
+}
+
+/* ── Username editor ──────────────────────────────────────────────────────── */
+.profile-username-row {
+  gap: 4px;
+}
+.profile-username-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.profile-username-current {
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: var(--hover-bg);
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+.profile-username-edit-btn {
+  font-size: 0.82rem;
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text);
+}
+.profile-username-edit-btn:hover {
+  background: var(--hover-bg);
+}
+.profile-username-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.profile-username-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.profile-username-input-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.profile-username-prefix {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.profile-username-input-row input {
+  flex: 1;
+  font-family: inherit;
+}
+.profile-username-preview {
+  font-size: 0.8rem;
+  color: var(--muted);
+  word-break: break-all;
+}
+.profile-username-feedback {
+  font-size: 0.82rem;
+  padding: 2px 0;
+}
+.profile-username-feedback.ok { color: #2e7d32; }
+.profile-username-feedback.bad { color: #b23a3a; }
+body.dark-mode .profile-username-feedback.ok { color: #8fd68f; }
+body.dark-mode .profile-username-feedback.bad { color: #e08a8a; }
+.profile-username-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ── Visibility toggle (matches Selected/Full pill style) ───────────────── */
+.profile-visibility-row {
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+.profile-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  flex: 0 0 auto;
+}
+.profile-switch input {
+  display: none;
+}
+.profile-switch-track {
+  position: relative;
+  width: 32px;
+  height: 18px;
+  background: var(--line);
+  border-radius: 9px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.profile-switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: var(--muted);
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s, background 0.15s;
+}
+.profile-switch input:checked + .profile-switch-track {
+  background: var(--accent);
+}
+.profile-switch input:checked + .profile-switch-track .profile-switch-thumb {
+  transform: translateX(14px);
+  background: #fff;
+}
+body.dark-mode .profile-switch-thumb {
+  background: #ece6d8;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+body.dark-mode .profile-switch input:checked + .profile-switch-track .profile-switch-thumb {
+  background: var(--bg);
+}
+
+/* ── Share button + public URL row ─────────────────────────────────────────── */
+.profile-public-url-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.profile-public-url-value {
+  font-family: inherit;
+  color: var(--text);
+}
+.profile-share-btn {
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text);
+}
+.profile-share-btn:hover {
+  background: var(--hover-bg);
+}
+
+/* ── Public-view overrides (viewing someone else's profile) ──────────────── */
+/* Hide owner-only controls so public viewers see the same visual structure
+   as the owner but without edit affordances. Applied via .is-public on
+   .profile-page; toggled in js/pages/profile.js when viewMode === "public". */
+.profile-page.is-public .paper-actions,
+.profile-page.is-public .my-epaulette,
+.profile-page.is-public .my-epaulette-h,
+.profile-page.is-public .paper-select-checkbox,
+.profile-page.is-public .profile-select-btn,
+.profile-page.is-public .profile-edit-icon-btn,
+.profile-page.is-public .profile-add-paper-btn,
+.profile-page.is-public .profile-username-edit-btn {
+  display: none !important;
+}
+/* Author names: hover styling stays (color change in :hover), but clicks
+   are no-ops in public view — the JS handler guards on viewMode. */
+.profile-page.is-public .profile-author-clickable {
+  cursor: default;
+}
+.profile-page.is-public .profile-citation-badge {
+  pointer-events: none;
+  cursor: default;
+}
+
+/* ── Field help tooltip ("?" next to label) ──────────────────────────────── */
+.profile-field-label {
+  display: inline-flex;
+  align-items: center;
+}
+.profile-field-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 6px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1;
+  font-weight: 600;
+  cursor: help;
+  padding: 0;
+  position: relative;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.profile-field-help:hover,
+.profile-field-help:focus {
+  color: var(--text);
+  border-color: var(--text);
+  outline: none;
+}
+.profile-field-help:hover::after,
+.profile-field-help:focus::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 6px);
+  left: -4px;
+  width: 240px;
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text);
+  white-space: normal;
+  z-index: 20;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.profile-field-hint {
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.profile-field-hint.is-error {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+/* ── URL inputs grid: 2 columns on desktop, 1 on mobile ─────────────────── */
+.profile-url-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+.profile-url-grid .profile-field {
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .profile-url-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Social link icons (replaces text labels for Home/Scholar/etc.) ─────── */
+.profile-social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--muted);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+.profile-social-link:hover {
+  color: var(--text);
+  background: var(--accent-soft);
+}
+.profile-social-link svg {
+  display: block;
+}
+
+/* ── Journal sort: "Show more / Show less" toggle for Others ─────────────── */
+/* Inline text-link feel à la Google Scholar; sans-serif (matches footer),
+   muted color, no panel background. The `.profile-page` prefix is required
+   to outrank `.profile-page button { font-family: Roboto… }` (0,1,1). */
+.profile-page .profile-others-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 14px 0 6px;
+  cursor: pointer;
+  color: var(--muted);
+  font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+.profile-page .profile-others-toggle:hover { color: var(--text); }
+.profile-others-chevron {
+  display: inline-flex;
+  align-items: center;
+  color: currentColor;
+  transition: transform 0.25s ease;
+}
+.profile-others-toggle[aria-expanded="true"] .profile-others-chevron {
+  transform: rotate(180deg);
+}
+.profile-others-subheader {
+  opacity: 0.7;
+}
+
+/* ── Journal order modal ────────────────────────────────────────────────── */
+.profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.profile-modal {
+  background: var(--panel-strong);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 20px 22px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+  /* Footer-style sans-serif for everything inside the modal except the
+     journal-name chips, which override below. */
+  font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+}
+.profile-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.profile-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: inherit;
+}
+.profile-modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--text);
+  opacity: 0.7;
+}
+.profile-modal-close:hover { opacity: 1; }
+.profile-modal-hint {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin: 4px 0 14px;
+  line-height: 1.45;
+  font-family: inherit;
+}
+.profile-modal-section-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  opacity: 0.6;
+  margin: 14px 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: inherit;
+}
+.profile-modal-section-label:first-child { margin-top: 0; }
+.profile-modal-empty {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  padding: 6px 2px 8px;
+  font-family: inherit;
+}
+.profile-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+.profile-modal-actions button {
+  font-family: inherit;
+  font-size: 0.92rem;
+}
+
+/* Journal name on each chip uses the publication-list serif treatment, so
+   pinned chips read like a preview of the rendered journal headers. */
+.profile-journal-chip-label {
+  font-family: "Harding", "PT Serif", Georgia, serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.chip-row-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+.chip-row-vertical .chip {
+  width: 100%;
+  justify-content: space-between;
+}
+.chip-row-vertical .chip.is-pinned-journal { cursor: grab; }
+.chip-row-vertical .chip.is-pinned-journal.is-dragging { opacity: 0.4; }
+.chip-row-vertical .chip.drag-over-before { box-shadow: 0 -3px 0 0 var(--accent); }
+.chip-row-vertical .chip.drag-over-after  { box-shadow: 0  3px 0 0 var(--accent); }
+.chip-row-vertical .chip.is-candidate-journal { cursor: pointer; opacity: 0.85; }
+.chip-row-vertical .chip.is-candidate-journal:hover { opacity: 1; background: var(--accent-soft); }
+
+@media (max-width: 700px) {
+  .profile-modal-overlay { padding: 0; }
+  .profile-modal {
+    max-width: none;
+    max-height: 100vh;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+
+/* ── Private paper: lock icon on card topline ───────────────────────────── */
+.paper-private-lock {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.paper-private-lock:hover {
+  color: var(--text);
+  background: var(--accent-soft);
+}
+.paper-private-lock svg {
+  display: block;
+}
+
+/* ── Manual add form: Private checkbox row ──────────────────────────────── */
+.add-manual-private {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 4px;
+  padding: 6px 0 2px;
+  cursor: pointer;
+}
+.add-manual-private input[type="checkbox"] {
+  grid-row: 1;
+  grid-column: 1;
+  width: auto;
+  margin: 0;
+  padding: 0;
+}
+.add-manual-private-text {
+  grid-row: 1;
+  grid-column: 2;
+  font-size: 14px;
+  color: var(--text);
+}
+.add-manual-private-hint {
+  grid-row: 2;
+  grid-column: 2;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+/* ── Edit form: Private checkbox row ────────────────────────────────────── */
+.profile-edit-private {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  cursor: pointer;
+}
+.profile-edit-private input[type="checkbox"] {
+  width: auto;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0;
+}
+.profile-edit-private-text {
+  font-size: 14px;
+  color: var(--text);
+}

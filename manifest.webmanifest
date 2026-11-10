@@ -1,0 +1,23 @@
+{
+  "name": "Research Atlas",
+  "short_name": "Atlas",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1c1d20",
+  "theme_color": "#1c1d20",
+  "icons": [
+    {
+      "src": "./favicon-app.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./favicon-app.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

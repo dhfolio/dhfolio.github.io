@@ -1,0 +1,438 @@
+/* pages/news.css — News page (lab-website style announcements) */
+
+/* Matches .profile-page: fills the content wrap, no centered column. */
+.news-page {
+  max-width: none;
+  margin: 0;
+  padding: 0 0 40px;
+  font-family: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.news-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 22px;
+}
+.news-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.news-subtitle {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  word-break: break-all;
+}
+.news-subtitle a { color: var(--link); }
+.news-header-actions { flex-shrink: 0; }
+
+.news-add-btn {
+  border: 1px solid var(--line-strong);
+  background: var(--panel-strong);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 550;
+  cursor: pointer;
+}
+.news-add-btn:hover:not(:disabled) { background: var(--accent-soft); }
+.news-add-btn:disabled { opacity: 0.5; cursor: default; }
+
+/* ── Items ────────────────────────────────────────────────────────────────── */
+.news-item {
+  padding: 0 0 26px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--line);
+}
+.news-item:last-child { border-bottom: none; margin-bottom: 0; }
+
+.news-item-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.news-item-date {
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.news-item-actions {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.news-item:hover .news-item-actions,
+.news-item:focus-within .news-item-actions { opacity: 1; }
+
+.news-icon-btn {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 3px 9px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.news-icon-btn:hover { background: var(--accent-soft); color: var(--text); }
+.news-icon-btn.news-danger:hover { background: var(--danger-bg); color: var(--danger-fg); }
+
+.news-item-title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.news-item-body { font-size: 0.94rem; line-height: 1.65; }
+/* Body block/list rules live in css/richtext.css (.rt-*). */
+.news-item-body a,
+.news-links a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+/* Keep H2O / cm-1 from stretching the line box. */
+.news-item-body sub,
+.news-item-body sup { font-size: 0.72em; line-height: 0; }
+
+/* ── Link lists ───────────────────────────────────────────────────────────── */
+.news-links {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  list-style: disc;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.news-link-item { margin-bottom: 3px; }
+.news-sublinks {
+  margin: 3px 0 6px;
+  padding-left: 18px;
+  list-style: circle;
+  color: var(--muted);
+}
+
+/* ── Images ───────────────────────────────────────────────────────────────── */
+.news-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+.news-image { margin: 0; max-width: 240px; }
+.news-image img {
+  display: block;
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  cursor: zoom-in;
+  object-fit: cover;
+}
+.news-image figcaption {
+  margin-top: 5px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* ── Wide desktop: photos beside the text ─────────────────────────────────── */
+/* Below 1101px the sidebar-collapsed column is too narrow to split, so items
+   keep the stacked flow above. Only items that actually have photos go 2-up. */
+@media (min-width: 1101px) {
+  .news-item:has(> .news-images) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(280px, 32%, 380px);
+    column-gap: 28px;
+    align-items: start;
+  }
+  .news-item:has(> .news-images) .news-images {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 0;
+    align-items: start;
+  }
+  /* Two columns from 3 photos up. A portrait cell is tall, so a pair that
+     includes one goes side by side rather than stacking into a tower. */
+  .news-item:has(> .news-images) .news-images:has(> :nth-child(3)),
+  .news-item:has(> .news-images) .news-images:has(> :nth-child(2)):has(.is-portrait) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .news-item:has(> .news-images) .news-image { max-width: none; }
+  /* Cell shape follows each photo's own orientation — tagged in JS from the
+     decoded naturalWidth/Height, since CSS cannot read intrinsic size. Untagged
+     (still decoding, or landscape) keeps the 4:3 default. */
+  .news-item:has(> .news-images) .news-image img {
+    width: 100%;
+    max-height: none;
+    aspect-ratio: 4 / 3;
+  }
+  .news-item:has(> .news-images) .news-image.is-square img { aspect-ratio: 1 / 1; }
+  .news-item:has(> .news-images) .news-image.is-portrait img { aspect-ratio: 3 / 4; }
+
+  /* An odd count promotes the first photo to a full-width hero: 1 → one large,
+     3 → hero + pair, 5 → hero + 2x2. Never a portrait one, though — stretched
+     across the column it would be cropped to a letterbox strip, which is how
+     three portrait shots ended up reading as three stacked bars. */
+  .news-item:has(> .news-images) .news-image:first-child:nth-last-child(odd):not(.is-portrait) {
+    grid-column: 1 / -1;
+  }
+  .news-item:has(> .news-images)
+    .news-image:first-child:nth-last-child(odd):not(.is-portrait):not(.is-square) img {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+.news-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+}
+.news-lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+}
+
+/* Absolute so the arrows overlay the photo instead of shrinking its box. */
+.news-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+/* Restate the centering transform on hover/active: the unscoped
+   `button:hover { transform: translateY(-1px) }` in library.css outranks the
+   base rule here and would otherwise drop the arrow by half its height.
+   navigation.css, bin.css and library.css work around it the same way. */
+.news-lightbox-nav:hover,
+.news-lightbox-nav:active {
+  background: rgba(255, 255, 255, 0.34);
+  transform: translateY(-50%);
+}
+.news-lightbox-nav.is-prev { left: 16px; }
+.news-lightbox-nav.is-next { right: 16px; }
+
+.news-lightbox-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0 76px; /* clear the arrows */
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  text-align: center;
+  pointer-events: none;
+}
+.news-lightbox-count {
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.78rem;
+}
+
+/* ── Editor form ──────────────────────────────────────────────────────────── */
+.news-form {
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 28px;
+  box-shadow: var(--shadow);
+}
+.news-form-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.news-form-row .news-form-field { flex: 1 1 200px; }
+.news-form-field { margin-bottom: 14px; }
+.news-form-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.news-form-hint { font-weight: 400; }
+
+.news-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--line-strong);
+  background: var(--panel-strong);
+  color: var(--text);
+  border-radius: 9px;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 0.9rem;
+}
+.news-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.news-textarea { resize: vertical; line-height: 1.55; min-height: 120px; }
+/* A lone date picker should not stretch the full form width. */
+.news-date-field { max-width: 220px; }
+
+/* Toolbar rules live in css/richtext.css (.rt-toolbar / .rt-fmt-btn). */
+.news-textarea { font-variant-ligatures: none; }
+
+.news-inline-btn {
+  border: 1px dashed var(--line-strong);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.news-inline-btn:hover:not(:disabled) { background: var(--accent-soft); color: var(--text); }
+.news-inline-btn:disabled { opacity: 0.5; cursor: default; }
+
+.news-images-edit { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+.news-image-edit {
+  position: relative;
+  margin: 0;
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.news-image-edit img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  cursor: grab;
+}
+.news-image-edit img:active { cursor: grabbing; }
+.news-caption-input { font-size: 0.8rem; padding: 5px 8px; }
+
+/* Position badge — the first photo is the one rendered large in the item. */
+.news-image-pos {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 0.7rem;
+  font-weight: 650;
+  line-height: 1.5;
+  pointer-events: none;
+}
+
+.news-image-edit-actions { display: flex; gap: 4px; }
+.news-move-btn { padding: 3px 7px; line-height: 1.2; }
+.news-image-edit-actions .news-danger { margin-left: auto; }
+.news-move-btn:disabled { opacity: 0.35; cursor: default; }
+.news-move-btn:disabled:hover { background: transparent; color: var(--muted); }
+/* Thumbnails flow horizontally here, vertically on mobile — match the arrows. */
+.news-move-v { display: none; }
+
+.news-image-edit.is-dragging { opacity: 0.4; }
+.news-image-edit.drag-over-before { box-shadow: -3px 0 0 0 var(--accent); }
+.news-image-edit.drag-over-after { box-shadow: 3px 0 0 0 var(--accent); }
+
+.news-form-actions { display: flex; gap: 10px; }
+.news-save-btn {
+  border: none;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 10px;
+  padding: 9px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.news-save-btn:disabled { opacity: 0.6; cursor: default; }
+.news-cancel-btn {
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text);
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* ── States ───────────────────────────────────────────────────────────────── */
+.news-error {
+  border: 1px solid var(--danger-fg);
+  background: var(--danger-bg);
+  color: var(--danger-fg);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  margin-bottom: 18px;
+}
+.news-empty {
+  padding: 72px 24px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+.news-empty-title { margin: 0 0 8px; font-size: 1.05rem; font-weight: 600; }
+.news-empty-desc { margin: 0 auto; max-width: 420px; font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+.news-empty code {
+  background: var(--chip);
+  color: var(--chip-fg);
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-size: 0.85em;
+}
+
+/* ── Mobile ───────────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .news-page { padding: 0 0 40px; }
+  .news-header { padding: 12px 0 12px; margin-bottom: 18px; }
+  .news-title { font-size: 1.35rem; }
+  .news-item-actions { opacity: 1; }
+  .news-image { max-width: 100%; flex: 1 1 100%; }
+  .news-image img { max-height: 220px; width: 100%; }
+  .news-lightbox { padding: 16px; }
+  .news-lightbox-nav { width: 38px; height: 38px; font-size: 1.45rem; }
+  .news-lightbox-nav.is-prev { left: 6px; }
+  .news-lightbox-nav.is-next { right: 6px; }
+  .news-lightbox-bar { padding: 0 52px; }
+  .news-image-edit { width: 100%; }
+  .news-move-h { display: none; }
+  .news-move-v { display: inline; }
+  .news-image-edit.drag-over-before { box-shadow: 0 -3px 0 0 var(--accent); }
+  .news-image-edit.drag-over-after { box-shadow: 0 3px 0 0 var(--accent); }
+  .news-empty { padding: 48px 18px; }
+}

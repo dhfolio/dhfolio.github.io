@@ -1,0 +1,1172 @@
+/* ── Achievement Board (v0.5.2 — G-Lite tier decorations) ────────────── */
+
+/* Tier colour tokens */
+:root {
+  --tier-wood:    #c4a882;
+  --tier-bronze:  #cd7f32;
+  --tier-silver:  #a0a0a8;
+  --tier-gold:    #d4a017;
+  --tier-diamond: #7dd3fc;
+  --tier-mythic:  #d946ef;
+}
+body.dark-mode {
+  --tier-wood:    #d4b88c;
+  --tier-bronze:  #e8a05c;
+  --tier-silver:  #d4d6e0;
+  --tier-gold:    #f5c842;
+  --tier-diamond: #a8e0f8;
+  --tier-mythic:  #ec8cfa;
+}
+
+/* ── Modal override (wider for achievements) ──────────────────────────── */
+.profile-achievement-modal.achv-board {
+  max-width: 720px;
+  max-height: 85vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px 24px 20px;
+  scrollbar-width: thin;
+  font-family: Manrope, "Segoe UI", sans-serif;
+}
+.profile-achievement-overlay {
+  overscroll-behavior: contain;
+}
+.profile-achievement-modal.achv-board h2 {
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-weight: 800;
+}
+
+/* ── Top-level tabs (Scholarly / Atlas) ───────────────────────────────── */
+.achv-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 4px;
+  background: var(--chip);
+  border-radius: 999px;
+}
+.achv-tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-weight: 700;
+  font-size: 0.86rem;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 160ms, color 160ms;
+}
+.achv-tab-btn:hover { color: var(--text); }
+.achv-tab-btn.is-active {
+  background: var(--panel-strong);
+  color: var(--accent);
+  box-shadow: 0 2px 6px rgba(77, 45, 23, 0.08);
+}
+body.dark-mode .achv-tab-btn.is-active {
+  background: rgba(239, 225, 208, 0.1);
+  color: var(--accent);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.achv-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  padding: 0 6px;
+  height: 20px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(157, 79, 47, 0.12);
+  color: var(--accent);
+}
+.achv-tab-btn.is-active .achv-tab-count {
+  background: var(--accent);
+  color: #fffaf5;
+}
+
+/* ── Summary bar (Atlas tab only) ─────────────────────────────────────── */
+.achv-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.achv-summary-label { white-space: nowrap; font-weight: 700; }
+.achv-summary-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--chip);
+  overflow: hidden;
+}
+.achv-summary-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 400ms ease;
+}
+
+/* ── Category pills ───────────────────────────────────────────────────── */
+.achv-cats {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.achv-cats::-webkit-scrollbar { display: none; }
+.achv-cat-pill {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  cursor: pointer;
+  background: var(--chip);
+  color: var(--muted);
+  transition: background 120ms, color 120ms;
+}
+.achv-cat-pill:hover { color: var(--text); }
+.achv-cat-pill.is-active {
+  background: var(--accent);
+  color: #fffaf5;
+}
+
+/* ── Achievement grid ─────────────────────────────────────────────────── */
+.achv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+/* ── Slot card ────────────────────────────────────────────────────────── */
+.achv-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 18px 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel-strong);
+  transition: border-color 160ms, box-shadow 160ms, transform 200ms;
+  perspective: 600px;
+}
+.achv-card[data-achv-detail="1"] { cursor: pointer; }
+.achv-card[data-achv-detail="1"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.achv-multiplier {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: #fffaf5;
+  background: #2a2a2e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  z-index: 3;
+}
+body.dark-mode .achv-multiplier {
+  background: #e8d5bf;
+  color: #2a2a2e;
+}
+.achv-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 6px 20px rgba(77, 45, 23, 0.1);
+  transform: translateY(-2px);
+}
+body.dark-mode .achv-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   RPG Medal with G-Lite tier decorations
+   Structure: <div class="achv-medal" data-tier="N">
+                <span class="achv-medal-aura"></span>
+                <span class="achv-medal-ribbon-left"></span>
+                <span class="achv-medal-ribbon-right"></span>
+                <span class="achv-medal-disc">ICON</span>
+              </div>
+   ───────────────────────────────────────────────────────────────── */
+.achv-medal {
+  position: relative;
+  width: 78px; height: 96px;
+  margin-bottom: 10px;
+  transition: transform 300ms ease;
+}
+.achv-card:hover .achv-medal {
+  transform: rotateY(14deg) rotate(-4deg);
+}
+
+.achv-medal-ribbon-left,
+.achv-medal-ribbon-right {
+  position: absolute;
+  top: 0;
+  width: 18px; height: 52px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 88%, 0 100%);
+  box-shadow: inset -2px 0 3px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+.achv-medal-ribbon-left  { left: 12px;  transform: rotate(-8deg); }
+.achv-medal-ribbon-right { right: 12px; transform: rotate(8deg); }
+
+.achv-medal-disc {
+  position: absolute;
+  bottom: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 66px; height: 66px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: #fff;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    inset 0 -5px 10px rgba(0, 0, 0, 0.28),
+    inset 0  5px  8px rgba(255, 255, 255, 0.28),
+    0 5px 12px rgba(0, 0, 0, 0.25);
+  border: 3px solid;
+  z-index: 3;
+}
+
+/* Aura backdrop layer (halos + sunburst/mandala + sparkles) */
+.achv-medal-aura {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Tier 1 Wood: 3-stop gradient + green halo + 🌿 leaves ────────────── */
+.achv-medal[data-tier="1"] .achv-medal-disc {
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,0.45) 0%, transparent 42%),
+    linear-gradient(160deg, #d9bc8c 0%, var(--tier-wood) 45%, #8a6d3f 100%);
+  border-color: #7a5f35;
+}
+.achv-medal[data-tier="1"] .achv-medal-ribbon-left,
+.achv-medal[data-tier="1"] .achv-medal-ribbon-right {
+  background: linear-gradient(180deg, #8a6e44 0%, #5c4524 100%);
+}
+.achv-medal[data-tier="1"] .achv-medal-aura {
+  background: radial-gradient(ellipse 80% 60% at 50% 100%, rgba(120,160,80,0.35) 0%, transparent 60%);
+}
+.achv-medal[data-tier="1"] .achv-medal-aura::before,
+.achv-medal[data-tier="1"] .achv-medal-aura::after {
+  content: "🌿";
+  position: absolute;
+  bottom: -4px;
+  font-size: 22px;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.25)) saturate(0.85);
+}
+.achv-medal[data-tier="1"] .achv-medal-aura::before { left: -12px; transform: rotate(-24deg); }
+.achv-medal[data-tier="1"] .achv-medal-aura::after  { right: -12px; transform: rotate(24deg) scaleX(-1); }
+
+/* ── Tier 2 Bronze: 3-stop gradient + amber halo + glowing embers ──────── */
+.achv-medal[data-tier="2"] .achv-medal-disc {
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255,230,190,0.5) 0%, transparent 42%),
+    linear-gradient(160deg, #eca568 0%, var(--tier-bronze) 45%, #864f1f 100%);
+  border-color: #6e3f12;
+}
+.achv-medal[data-tier="2"] .achv-medal-ribbon-left,
+.achv-medal[data-tier="2"] .achv-medal-ribbon-right {
+  background: linear-gradient(180deg, #a66826 0%, #6d3f10 100%);
+}
+.achv-medal[data-tier="2"] .achv-medal-aura {
+  background: radial-gradient(circle at 50% 70%, rgba(205,127,50,0.42) 0%, transparent 60%);
+}
+.achv-medal[data-tier="2"] .achv-medal-aura::before {
+  content: "";
+  position: absolute;
+  top: 8%; left: -6%;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: #f5b878;
+  box-shadow:
+    0 0 8px 2px rgba(245,184,120,0.7),
+    70px 10px 0 -1px #f5b878, 70px 10px 10px 0 rgba(245,184,120,0.55),
+    40px 66px 0 -1px #f5b878, 40px 66px 10px 0 rgba(245,184,120,0.55);
+  animation: achv-ember 3s ease-in-out infinite;
+}
+
+/* ── Tier 3 Silver: 3-stop gradient + cool halo + twinkling stars ──────── */
+.achv-medal[data-tier="3"] .achv-medal-disc {
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,0.6) 0%, transparent 42%),
+    linear-gradient(160deg, #eceef3 0%, var(--tier-silver) 45%, #6c6d77 100%);
+  border-color: #4a4b54;
+  color: #fafbff;
+  text-shadow: 0 2px 3px rgba(50,50,70,0.5);
+}
+.achv-medal[data-tier="3"] .achv-medal-ribbon-left,
+.achv-medal[data-tier="3"] .achv-medal-ribbon-right {
+  background: linear-gradient(180deg, #9ea0aa 0%, #5c5d66 100%);
+}
+.achv-medal[data-tier="3"] .achv-medal-aura {
+  background: radial-gradient(circle at 50% 70%, rgba(200,210,225,0.45) 0%, transparent 60%);
+}
+.achv-medal[data-tier="3"] .achv-medal-aura::before {
+  content: "✦";
+  position: absolute;
+  top: 4%; left: 10%;
+  color: #d8dee8;
+  font-size: 10px;
+  text-shadow:
+     56px -2px 0 #d8dee8,
+     -18px 52px 0 #d8dee8,
+     72px 54px 0 #d8dee8,
+     32px 90px 0 #d8dee8;
+  animation: achv-twinkle 2.5s ease-in-out infinite;
+}
+
+/* ── Tier 4 Gold: 3-stop gradient + gold halo + 8-point sunburst + sparkles ─── */
+.achv-medal[data-tier="4"] .achv-medal-disc {
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255,252,210,0.7) 0%, transparent 42%),
+    linear-gradient(160deg, #ffe27a 0%, var(--tier-gold) 45%, #8a6108 100%);
+  border-color: #6b4e08;
+  color: #4a3405;
+  text-shadow: 0 1px 2px rgba(255,240,180,0.6), 0 2px 3px rgba(0,0,0,0.25);
+}
+.achv-medal[data-tier="4"] .achv-medal-ribbon-left,
+.achv-medal[data-tier="4"] .achv-medal-ribbon-right {
+  background: linear-gradient(180deg, #c89418 0%, #7e5906 100%);
+}
+.achv-medal[data-tier="4"] .achv-medal-aura {
+  background: radial-gradient(circle at 50% 70%, rgba(255,220,100,0.45) 0%, transparent 55%);
+}
+.achv-medal[data-tier="4"] .achv-medal-aura::before {
+  content: "";
+  position: absolute;
+  bottom: -8px; left: 50%;
+  transform: translateX(-50%);
+  width: 128px; height: 128px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(212,160,23,0.55) 0 6deg, transparent 6deg 45deg,
+    rgba(212,160,23,0.55) 45deg 51deg, transparent 51deg 90deg,
+    rgba(212,160,23,0.55) 90deg 96deg, transparent 96deg 135deg,
+    rgba(212,160,23,0.55) 135deg 141deg, transparent 141deg 180deg,
+    rgba(212,160,23,0.55) 180deg 186deg, transparent 186deg 225deg,
+    rgba(212,160,23,0.55) 225deg 231deg, transparent 231deg 270deg,
+    rgba(212,160,23,0.55) 270deg 276deg, transparent 276deg 315deg,
+    rgba(212,160,23,0.55) 315deg 321deg, transparent 321deg 360deg);
+  -webkit-mask: radial-gradient(circle, transparent 38px, #000 40px, #000 60px, transparent 62px);
+          mask: radial-gradient(circle, transparent 38px, #000 40px, #000 60px, transparent 62px);
+}
+.achv-medal[data-tier="4"] .achv-medal-aura::after {
+  content: "✦";
+  position: absolute;
+  top: 0; left: -8px;
+  color: #ffd966;
+  font-size: 10px;
+  text-shadow:
+     38px -10px 0 #fff1a8,
+     82px -2px 0 #ffd966,
+     94px 38px 0 #fff1a8,
+     -10px 34px 0 #fff1a8,
+     8px 74px 0 #ffd966,
+     88px 84px 0 #fff1a8;
+  filter: drop-shadow(0 0 3px rgba(255,217,102,0.8));
+  animation: achv-twinkle 2.2s ease-in-out infinite;
+}
+
+/* ── Tier 5 Diamond: faceted disc + prismatic rotating aura + 12-point mandala + sparkles + 👑 ── */
+.achv-medal[data-tier="5"] .achv-medal-disc {
+  background-color: #7dc7e8;
+  background-image:
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,0.75) 0%, transparent 42%),
+    linear-gradient(160deg, #f0faff 0%, var(--tier-diamond) 50%, #4a9cc0 100%);
+  border-color: #4a9cc0;
+  color: #0d3a4e;
+  text-shadow: 0 0 6px rgba(255,255,255,0.8), 0 2px 3px rgba(30,80,110,0.4);
+}
+.achv-medal[data-tier="5"] .achv-medal-ribbon-left,
+.achv-medal[data-tier="5"] .achv-medal-ribbon-right {
+  background: linear-gradient(180deg, #80aec2 0%, #3a6a82 100%);
+}
+.achv-medal[data-tier="5"] .achv-medal-aura {
+  background: conic-gradient(
+    from 0deg,
+    rgba(255,182,193,0.28),
+    rgba(255,223,128,0.26),
+    rgba(144,238,144,0.28),
+    rgba(125,211,252,0.42),
+    rgba(186,143,255,0.35),
+    rgba(255,182,193,0.28));
+  border-radius: 50%;
+  filter: blur(6px);
+  inset: 4px;
+  animation: achv-aura-spin 14s linear infinite;
+}
+.achv-medal[data-tier="5"] .achv-medal-aura::before {
+  content: "";
+  position: absolute;
+  bottom: -12px; left: 50%;
+  transform: translateX(-50%);
+  width: 134px; height: 134px;
+  background: conic-gradient(
+    from 15deg,
+    rgba(125,211,252,0.5) 0 5deg, transparent 5deg 30deg,
+    rgba(125,211,252,0.5) 30deg 35deg, transparent 35deg 60deg,
+    rgba(125,211,252,0.5) 60deg 65deg, transparent 65deg 90deg,
+    rgba(125,211,252,0.5) 90deg 95deg, transparent 95deg 120deg,
+    rgba(125,211,252,0.5) 120deg 125deg, transparent 125deg 150deg,
+    rgba(125,211,252,0.5) 150deg 155deg, transparent 155deg 180deg,
+    rgba(125,211,252,0.5) 180deg 185deg, transparent 185deg 210deg,
+    rgba(125,211,252,0.5) 210deg 215deg, transparent 215deg 240deg,
+    rgba(125,211,252,0.5) 240deg 245deg, transparent 245deg 270deg,
+    rgba(125,211,252,0.5) 270deg 275deg, transparent 275deg 300deg,
+    rgba(125,211,252,0.5) 300deg 305deg, transparent 305deg 330deg,
+    rgba(125,211,252,0.5) 330deg 335deg, transparent 335deg 360deg);
+  -webkit-mask: radial-gradient(circle, transparent 40px, #000 42px, #000 62px, transparent 64px);
+          mask: radial-gradient(circle, transparent 40px, #000 42px, #000 62px, transparent 64px);
+  filter: none;
+}
+.achv-medal[data-tier="5"] .achv-medal-aura::after {
+  content: "✧";
+  position: absolute;
+  top: 0; left: -8px;
+  color: #fff;
+  font-size: 10px;
+  text-shadow:
+     42px -10px 0 #fff,
+     82px -2px 0 #d8ecf9,
+     96px 38px 0 #fff,
+     -10px 42px 0 #d8ecf9,
+     8px 82px 0 #fff,
+     94px 80px 0 #d8ecf9;
+  filter: drop-shadow(0 0 4px rgba(125,211,252,0.8));
+  animation: achv-twinkle 1.8s ease-in-out infinite;
+}
+.achv-medal[data-tier="5"]::after {
+  content: "👑";
+  position: absolute;
+  top: -18px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  z-index: 4;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)) drop-shadow(0 0 5px rgba(255,220,130,0.5));
+}
+
+/* ── Tier 6 Mythic: holographic disc + rainbow aura + 16-point mandala + sparkles + 🔮 ── */
+.achv-medal[data-tier="6"] .achv-medal-disc {
+  background-color: #c77af5;
+  background-image:
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,0.8) 0%, transparent 42%),
+    conic-gradient(from 210deg at 60% 40%,
+      rgba(253,224,71,0.45),
+      rgba(244,114,182,0.55),
+      rgba(217,70,239,0.55),
+      rgba(139,92,246,0.55),
+      rgba(56,189,248,0.45),
+      rgba(74,222,128,0.4),
+      rgba(253,224,71,0.45)),
+    linear-gradient(160deg, #fde4ff 0%, #f0abfc 30%, var(--tier-mythic) 60%, #7c3aed 100%);
+  border-color: #7c3aed;
+  color: #3b0764;
+  text-shadow: 0 0 6px rgba(255,255,255,0.85), 0 2px 3px rgba(70,20,120,0.4);
+}
+.achv-medal[data-tier="6"] .achv-medal-ribbon-left,
+.achv-medal[data-tier="6"] .achv-medal-ribbon-right {
+  background: linear-gradient(180deg, #c084fc 0%, #6b21a8 100%);
+}
+.achv-medal[data-tier="6"] .achv-medal-aura {
+  background: conic-gradient(
+    from 0deg,
+    rgba(253,224,71,0.4),
+    rgba(244,114,182,0.4),
+    rgba(217,70,239,0.45),
+    rgba(139,92,246,0.42),
+    rgba(56,189,248,0.4),
+    rgba(74,222,128,0.38),
+    rgba(253,224,71,0.4));
+  border-radius: 50%;
+  filter: blur(7px);
+  inset: 2px;
+  animation: achv-aura-spin 10s linear infinite;
+}
+.achv-medal[data-tier="6"] .achv-medal-aura::before {
+  content: "";
+  position: absolute;
+  bottom: -14px; left: 50%;
+  transform: translateX(-50%);
+  width: 138px; height: 138px;
+  background: conic-gradient(
+    from 11.25deg,
+    rgba(217,70,239,0.55) 0 4deg, transparent 4deg 22.5deg,
+    rgba(217,70,239,0.55) 22.5deg 26.5deg, transparent 26.5deg 45deg,
+    rgba(217,70,239,0.55) 45deg 49deg, transparent 49deg 67.5deg,
+    rgba(217,70,239,0.55) 67.5deg 71.5deg, transparent 71.5deg 90deg,
+    rgba(217,70,239,0.55) 90deg 94deg, transparent 94deg 112.5deg,
+    rgba(217,70,239,0.55) 112.5deg 116.5deg, transparent 116.5deg 135deg,
+    rgba(217,70,239,0.55) 135deg 139deg, transparent 139deg 157.5deg,
+    rgba(217,70,239,0.55) 157.5deg 161.5deg, transparent 161.5deg 180deg,
+    rgba(217,70,239,0.55) 180deg 184deg, transparent 184deg 202.5deg,
+    rgba(217,70,239,0.55) 202.5deg 206.5deg, transparent 206.5deg 225deg,
+    rgba(217,70,239,0.55) 225deg 229deg, transparent 229deg 247.5deg,
+    rgba(217,70,239,0.55) 247.5deg 251.5deg, transparent 251.5deg 270deg,
+    rgba(217,70,239,0.55) 270deg 274deg, transparent 274deg 292.5deg,
+    rgba(217,70,239,0.55) 292.5deg 296.5deg, transparent 296.5deg 315deg,
+    rgba(217,70,239,0.55) 315deg 319deg, transparent 319deg 337.5deg,
+    rgba(217,70,239,0.55) 337.5deg 341.5deg, transparent 341.5deg 360deg);
+  -webkit-mask: radial-gradient(circle, transparent 42px, #000 44px, #000 64px, transparent 66px);
+          mask: radial-gradient(circle, transparent 42px, #000 44px, #000 64px, transparent 66px);
+  filter: none;
+}
+.achv-medal[data-tier="6"] .achv-medal-aura::after {
+  content: "✦";
+  position: absolute;
+  top: 0; left: -10px;
+  color: #fde68a;
+  font-size: 11px;
+  text-shadow:
+     44px -12px 0 #fbcfe8,
+     84px -4px 0 #f0abfc,
+     98px 40px 0 #ddd6fe,
+     -12px 44px 0 #a5f3fc,
+     6px 84px 0 #fde68a,
+     96px 84px 0 #fbcfe8,
+     52px 48px 0 #f0abfc;
+  filter: drop-shadow(0 0 4px rgba(217,70,239,0.85));
+  animation: achv-twinkle 1.5s ease-in-out infinite;
+}
+.achv-medal[data-tier="6"]::after {
+  content: "🔮";
+  position: absolute;
+  top: -20px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  z-index: 4;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)) drop-shadow(0 0 6px rgba(217,70,239,0.7));
+}
+
+@keyframes achv-twinkle { 0%,100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes achv-ember   { 0%,100% { transform: translateY(0); opacity: 0.9; } 50% { transform: translateY(-4px); opacity: 1; } }
+@keyframes achv-aura-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ─────────────────────────────────────────────────────────────────────
+   Shield shape (tier-less, used by thesis series)
+   Stack 1/2/3 plates depending on shieldStack.
+   ───────────────────────────────────────────────────────────────── */
+.achv-shield {
+  position: relative;
+  width: 78px; height: 96px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transition: transform 300ms ease;
+}
+.achv-card:hover .achv-shield {
+  transform: translateY(-2px) rotate(-3deg);
+}
+.achv-shield-plate {
+  position: absolute;
+  bottom: 4px;
+  width: 56px; height: 72px;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255,255,255,0.42) 0%, transparent 48%),
+    linear-gradient(160deg, #e8ddc9 0%, #c9b896 48%, #8a7650 100%);
+  clip-path: polygon(0% 0%, 100% 0%, 100% 55%, 50% 100%, 0% 55%);
+  box-shadow:
+    inset 0 -6px 10px rgba(80, 55, 20, 0.35),
+    inset 0  4px  8px rgba(255, 250, 235, 0.35),
+    0 4px 10px rgba(80, 55, 20, 0.25);
+}
+.achv-shield-plate[data-pos="top"]  { z-index: 3; left: 50%; transform: translateX(-50%); }
+.achv-shield-plate[data-pos="mid"]  { z-index: 2; left: calc(50% - 10px); transform: translateX(-50%) translate(-6px, -3px) rotate(-6deg); }
+.achv-shield-plate[data-pos="back"] { z-index: 1; left: calc(50% + 10px); transform: translateX(-50%) translate(6px, -3px) rotate(6deg); }
+.achv-shield-icon {
+  position: absolute;
+  top: 40%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+  color: #fff;
+  text-shadow: 0 2px 3px rgba(60, 40, 15, 0.45);
+}
+body.dark-mode .achv-shield-plate {
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255,255,255,0.22) 0%, transparent 48%),
+    linear-gradient(160deg, #a8997c 0%, #7a6a4f 48%, #4a3d28 100%);
+  box-shadow:
+    inset 0 -6px 10px rgba(0, 0, 0, 0.45),
+    inset 0  4px  8px rgba(255, 250, 235, 0.18),
+    0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Flag / medieval banner shape (used by large-team series)
+   Uses tier colors for the banner. Pole + finial + swallow-tail banner.
+   ───────────────────────────────────────────────────────────────── */
+.achv-flag {
+  position: relative;
+  width: 78px; height: 96px;
+  margin-bottom: 10px;
+  transition: transform 300ms ease;
+}
+.achv-card:hover .achv-flag {
+  transform: translateY(-2px) rotate(-3deg);
+}
+.achv-flag-pole {
+  position: absolute;
+  left: 16px; top: 4px;
+  width: 3px; height: 88px;
+  background: linear-gradient(to right, #8a6d3f, #4a3620, #8a6d3f);
+  border-radius: 2px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.25);
+  z-index: 2;
+}
+.achv-flag-finial {
+  position: absolute;
+  left: 14px; top: 0;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffe27a, #d4a017 60%, #8a6108);
+  box-shadow: 0 0 4px rgba(212, 160, 23, 0.6);
+  z-index: 3;
+}
+.achv-flag-banner {
+  position: absolute;
+  left: 19px; top: 6px;
+  width: 54px; height: 56px;
+  /* medieval swallow-tail banner */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 72% 78%, 50% 100%, 28% 78%, 0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 -4px 8px rgba(0, 0, 0, 0.25),
+    inset 0  3px 6px rgba(255, 255, 255, 0.28),
+    0 3px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+.achv-flag-icon {
+  font-size: 20px;
+  color: #fff;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.4);
+  margin-bottom: 6px;
+}
+
+/* Neutral fallback for tier-less flags (e.g., large-team series) */
+.achv-flag:not([data-tier]) .achv-flag-banner {
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255,255,255,0.3) 0%, transparent 45%),
+    linear-gradient(160deg, #b8a585 0%, #8c7a5a 48%, #5a4d36 100%);
+}
+
+.achv-flag[data-tier="2"] .achv-flag-banner {
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255,255,255,0.35) 0%, transparent 45%),
+    linear-gradient(160deg, #eca568 0%, var(--tier-bronze) 48%, #864f1f 100%);
+}
+.achv-flag[data-tier="3"] .achv-flag-banner {
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255,255,255,0.4) 0%, transparent 45%),
+    linear-gradient(160deg, #eceef3 0%, var(--tier-silver) 48%, #6c6d77 100%);
+}
+.achv-flag[data-tier="4"] .achv-flag-banner {
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255,255,255,0.45) 0%, transparent 45%),
+    linear-gradient(160deg, #ffe27a 0%, var(--tier-gold) 48%, #8a6108 100%);
+}
+.achv-flag[data-tier="5"] .achv-flag-banner {
+  background:
+    radial-gradient(circle at 30% 26%, rgba(255,255,255,0.5) 0%, transparent 45%),
+    linear-gradient(160deg, #f0faff 0%, var(--tier-diamond) 50%, #4a9cc0 100%);
+}
+
+/* ── Card text ────────────────────────────────────────────────────────── */
+.achv-title {
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-bottom: 3px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.achv-desc {
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-weight: 500;
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* ── Current value (Scholarly — no progress bar) ──────────────────────── */
+.achv-current-value {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 4px;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--accent);
+  text-align: center;
+}
+.achv-current-value .achv-progress-max {
+  margin-left: 6px;
+  color: var(--good);
+  font-size: 0.72rem;
+}
+
+/* ── Progress bar (Atlas only) ────────────────────────────────────────── */
+.achv-progress {
+  width: 100%;
+  margin-top: auto;
+}
+.achv-progress-bar {
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--chip);
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+.achv-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 400ms ease;
+}
+.achv-card[data-tier="1"] .achv-progress-fill { background: var(--tier-wood); }
+.achv-card[data-tier="2"] .achv-progress-fill { background: var(--tier-bronze); }
+.achv-card[data-tier="3"] .achv-progress-fill { background: var(--tier-silver); }
+.achv-card[data-tier="4"] .achv-progress-fill { background: var(--tier-gold); }
+.achv-card[data-tier="5"] .achv-progress-fill { background: var(--tier-diamond); }
+.achv-card[data-tier="6"] .achv-progress-fill {
+  background: linear-gradient(90deg, #fde68a, #f0abfc, var(--tier-mythic), #7c3aed);
+}
+
+.achv-progress-text {
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-weight: 600;
+  font-size: 0.68rem;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+.achv-progress-max {
+  font-weight: 800;
+  color: var(--good);
+}
+
+/* ── Empty state ──────────────────────────────────────────────────────── */
+.achv-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* ── Download button ──────────────────────────────────────────────────── */
+.achv-download-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.achv-download-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  cursor: pointer;
+  background: var(--chip);
+  color: var(--accent-dark, var(--accent));
+  transition: background 120ms, transform 120ms;
+}
+.achv-download-btn:hover {
+  background: var(--accent);
+  color: #fffaf5;
+  transform: translateY(-1px);
+}
+
+/* ── Export canvas (hidden, rendered for html-to-image SVG foreignObject) ── */
+.achv-export {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 1040px;
+  padding: 34px 34px 24px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Manrope, "Segoe UI", sans-serif;
+  z-index: -1;
+  overflow: visible;
+  box-sizing: border-box;
+}
+.achv-export-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ── Mobile export variant: 2 columns × 4 rows = 8 badges per file ─────── */
+.achv-export.achv-export-mobile {
+  width: 640px;
+  padding: 24px 20px 18px;
+}
+.achv-export.achv-export-mobile .achv-export-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.achv-export.achv-export-mobile .achv-card {
+  padding: 18px 12px 14px;
+  border-radius: 18px;
+}
+.achv-export.achv-export-mobile .achv-medal {
+  width: 96px;
+  height: 118px;
+  margin-bottom: 10px;
+}
+.achv-export.achv-export-mobile .achv-medal-ribbon-left,
+.achv-export.achv-export-mobile .achv-medal-ribbon-right {
+  width: 22px;
+  height: 64px;
+}
+.achv-export.achv-export-mobile .achv-medal-ribbon-left { left: 15px; }
+.achv-export.achv-export-mobile .achv-medal-ribbon-right { right: 15px; }
+.achv-export.achv-export-mobile .achv-medal-disc {
+  width: 80px;
+  height: 80px;
+  font-size: 31px;
+  border-width: 4px;
+}
+.achv-export.achv-export-mobile .achv-title {
+  font-size: 1.08rem;
+  margin-bottom: 3px;
+}
+.achv-export.achv-export-mobile .achv-desc {
+  font-size: 0.88rem;
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+.achv-export.achv-export-mobile .achv-current-value {
+  font-size: 1.05rem;
+  padding-top: 3px;
+}
+.achv-export.achv-export-mobile .achv-multiplier {
+  font-size: 13px;
+  min-width: 27px;
+  height: 24px;
+  padding: 0 8px;
+  top: 9px;
+  right: 11px;
+}
+.achv-export.achv-export-mobile .achv-shield {
+  width: 96px; height: 118px;
+  margin-bottom: 10px;
+}
+.achv-export.achv-export-mobile .achv-shield-plate {
+  width: 68px; height: 88px;
+}
+.achv-export.achv-export-mobile .achv-shield-icon {
+  font-size: 27px;
+}
+.achv-export.achv-export-mobile .achv-flag {
+  width: 96px; height: 118px;
+  margin-bottom: 10px;
+}
+.achv-export.achv-export-mobile .achv-flag-pole {
+  left: 20px; top: 6px;
+  width: 4px; height: 108px;
+}
+.achv-export.achv-export-mobile .achv-flag-finial {
+  left: 18px; top: 0;
+  width: 10px; height: 10px;
+}
+.achv-export.achv-export-mobile .achv-flag-banner {
+  left: 25px; top: 8px;
+  width: 66px; height: 68px;
+}
+.achv-export.achv-export-mobile .achv-flag-icon {
+  font-size: 24px;
+  margin-bottom: 7px;
+}
+
+/* ── Scale internals ~1.4× to match modal density on 1200px canvas ─────── */
+.achv-export .achv-card {
+  padding: 22px 15px 18px;
+  border-radius: 20px;
+  min-height: 0;
+}
+.achv-export .achv-medal {
+  width: 110px;
+  height: 134px;
+  margin-bottom: 12px;
+}
+.achv-export .achv-medal-ribbon-left,
+.achv-export .achv-medal-ribbon-right {
+  width: 25px;
+  height: 73px;
+}
+.achv-export .achv-medal-ribbon-left { left: 17px; }
+.achv-export .achv-medal-ribbon-right { right: 17px; }
+.achv-export .achv-medal-disc {
+  width: 92px;
+  height: 92px;
+  font-size: 36px;
+  border-width: 4px;
+}
+.achv-export .achv-title {
+  font-size: 1.26rem;
+  margin-bottom: 4px;
+}
+.achv-export .achv-desc {
+  font-size: 1rem;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+.achv-export .achv-current-value {
+  font-size: 1.2rem;
+  padding-top: 4px;
+}
+.achv-export .achv-multiplier {
+  font-size: 15px;
+  min-width: 31px;
+  height: 28px;
+  padding: 0 10px;
+  top: 11px;
+  right: 14px;
+}
+.achv-export .achv-shield {
+  width: 110px; height: 134px;
+  margin-bottom: 12px;
+}
+.achv-export .achv-shield-plate {
+  width: 78px; height: 101px;
+}
+.achv-export .achv-shield-icon {
+  font-size: 31px;
+}
+.achv-export .achv-flag {
+  width: 110px; height: 134px;
+  margin-bottom: 12px;
+}
+.achv-export .achv-flag-pole {
+  left: 22px; top: 6px;
+  width: 4px; height: 123px;
+}
+.achv-export .achv-flag-finial {
+  left: 20px; top: 0;
+  width: 10px; height: 10px;
+}
+.achv-export .achv-flag-banner {
+  left: 27px; top: 8px;
+  width: 76px; height: 78px;
+}
+.achv-export .achv-flag-icon {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+.achv-export-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 10px;
+}
+.achv-export-brand {
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--text);
+  opacity: 0.55;
+  letter-spacing: 0.02em;
+}
+.achv-export-watermark {
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  color: var(--accent);
+  opacity: 0.75;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ── Export mode: freeze animations so the SVG foreignObject captures a
+       consistent frame for the aura spin / shimmer. html-to-image renders
+       natively so conic-gradient + color-mix work as-is. ───────────────── */
+.achv-export,
+.achv-export *,
+.achv-export *::before,
+.achv-export *::after {
+  animation: none !important;
+}
+
+
+/* ── Mobile ───────────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .profile-achievement-modal.achv-board {
+    max-width: 100%;
+    max-height: 92vh;
+    margin: 0;
+    border-radius: 16px 16px 0 0;
+    align-self: flex-end;
+    padding: 20px 16px 16px;
+  }
+  .profile-achievement-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .achv-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .achv-card { padding: 14px 8px 10px; }
+  .achv-medal {
+    width: 68px; height: 82px;
+  }
+  .achv-medal-ribbon-left,
+  .achv-medal-ribbon-right { width: 16px; height: 44px; }
+  .achv-medal-ribbon-left  { left: 10px; }
+  .achv-medal-ribbon-right { right: 10px; }
+  .achv-medal-disc {
+    width: 58px; height: 58px;
+    font-size: 22px;
+  }
+  .achv-title { font-size: 0.82rem; }
+  .achv-desc { font-size: 0.7rem; }
+}
+
+/* ── Achievement detail sub-modal (tied-papers drill-down) ────────────── */
+.profile-achievement-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1010;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overscroll-behavior: contain;
+}
+.profile-achievement-detail-modal {
+  max-width: 520px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--panel-strong);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  font-family: Manrope, "Segoe UI", sans-serif;
+  scrollbar-width: thin;
+}
+.achv-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.achv-detail-header h3 {
+  margin: 0;
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--text);
+}
+.achv-detail-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 999px;
+}
+.achv-detail-close:hover { background: var(--chip); color: var(--text); }
+.achv-detail-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+}
+.achv-detail-row {
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.achv-detail-row:first-child { border-top: none; }
+.achv-detail-meta {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.achv-detail-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 2px 0 6px;
+  color: var(--text);
+}
+.achv-detail-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.achv-detail-role-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--chip);
+  color: var(--accent);
+}
+.achv-detail-cit {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+  font-weight: 600;
+}
+@media (max-width: 480px) {
+  .profile-achievement-detail-modal {
+    padding: 14px 16px;
+  }
+  .achv-detail-header h3 { font-size: 0.95rem; }
+  .achv-detail-title { font-size: 13px; }
+}

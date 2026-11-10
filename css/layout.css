@@ -1,0 +1,301 @@
+/* Auto-split from styles.css – do not edit styles.css directly, edit this file instead */
+
+/* ── Layout custom properties ──────────────────────────────────────────────── */
+:root {
+  --topbar-h: 56px;
+  --sidebar-w: 148px;
+}
+
+/* ── Base (mobile-first) ────────────────────────────────────────────────────── */
+.app-shell { max-width: 1400px; margin: 0 auto; padding: 28px 18px 48px; }
+
+h1, h2, h3, p { margin-top: 0; }
+
+/* Mobile hero: title + tagline + auth top-right */
+.hero {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  padding-right: 56px;
+}
+.hero-brand { min-width: 0; display: flex; align-items: center; gap: 10px; }
+.hero-brand h1 { margin: 0; line-height: 1; }
+.hero-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+button.hero-brand-mark {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: filter 400ms ease;
+}
+.hero-brand:hover button.hero-brand-mark,
+button.hero-brand-mark:hover {
+  background: none;
+  transform: none;
+  filter: drop-shadow(0 0 4px var(--halo)) drop-shadow(0 0 10px var(--halo));
+}
+button.hero-brand-mark:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hero-brand-title { cursor: pointer; }
+.hero-brand-title:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+@media (min-width: 1101px) {
+  .hero-brand-title { cursor: default; }
+}
+@media (prefers-reduced-motion: reduce) {
+  button.hero-brand-mark { transition: none; }
+}
+.hero-brand-mark svg { display: block; }
+.hero h1 {
+  font-family: "PT Serif", Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1.1;
+  margin-bottom: 4px;
+  font-weight: 700;
+  letter-spacing: -0.012em;
+}
+.hero-copy, .muted { color: var(--muted); }
+.hero-copy {
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.hero-topbar-search { display: none; } /* desktop only */
+.hero-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESKTOP LAYOUT  (≥ 701px)
+   StatMuse-style: fixed topbar + fixed left sidebar
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 701px) {
+
+  /* ── App shell: plain block (sidebar + topbar are fixed) ── */
+  .app-shell {
+    padding: 0;
+    max-width: none;
+    min-height: 100vh;
+  }
+
+  /* Page side offset: min 24px on narrow desktop, centers content beyond 1560px */
+  :root {
+    --page-side: max(24px, calc((100vw - 1560px) / 2));
+  }
+
+  /* ── Content area ── */
+  .content-wrap {
+    margin-left: calc(var(--page-side) + var(--sidebar-w));
+    margin-right: var(--page-side);
+    padding: calc(var(--topbar-h) + 20px) 16px 48px 12px;
+    min-height: 100vh;
+  }
+
+  /* ── Hero → fixed topbar (full-width bg + border, content inset via padding) ── */
+  .hero {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--topbar-h);
+    z-index: 300;
+    background: var(--bg);
+    border-bottom: none;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04), 0 2px 12px rgba(0,0,0,0.18);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0;
+    margin: 0;
+    padding: 0 var(--page-side);
+  }
+
+  /* Brand: just text sitting on the bg */
+  .hero-brand {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 24px 0 28px;
+    white-space: nowrap;
+  }
+  .hero-brand-text { min-width: 0; }
+  .hero h1 {
+    font-family: "PT Serif", Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+    margin: 0;
+    white-space: nowrap;
+  }
+  .hero-copy { display: none; }
+
+  .hero-brand { gap: 12px; }
+
+  /* Center: floating search pill */
+  .hero-topbar-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 20px;
+    height: 100%;
+  }
+  .topbar-input-wrap {
+    position: relative;
+    flex: 1;
+    display: flex;
+    min-width: 0;
+  }
+  .topbar-input-wrap .topbar-input { flex: 1; }
+  .topbar-input {
+    flex: 1;
+    height: 36px;
+    padding: 0 30px 0 16px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    font-size: 0.87rem;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: var(--panel);
+    color: var(--text);
+    min-width: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    transition: outline 0.12s, box-shadow 0.12s;
+  }
+  .topbar-input:focus {
+    outline: 2px solid var(--accent);
+    border-color: transparent;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.28);
+  }
+  .topbar-input::placeholder { color: var(--muted); opacity: 0.7; }
+
+  .topbar-fetch-btn {
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--panel);
+    color: var(--text);
+    font-size: 0.84rem;
+    font-weight: 500;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    transition: background 0.12s;
+    transform: none;
+  }
+  .topbar-fetch-btn:hover { background: var(--chip); transform: none; }
+  .hero-topbar-search {
+    position: relative;
+  }
+  /* ── Button shimmer loading animation ── */
+  @keyframes btn-shimmer {
+    0%   { background-position: 200% center; }
+    100% { background-position: -200% center; }
+  }
+  .topbar-fetch-btn.is-loading {
+    pointer-events: none;
+    color: var(--muted);
+    background: linear-gradient(
+      110deg,
+      var(--panel) 35%,
+      color-mix(in srgb, var(--accent) 22%, var(--panel)) 50%,
+      var(--panel) 65%
+    );
+    background-size: 200% 100%;
+    animation: btn-shimmer 1.6s ease-in-out infinite;
+  }
+  .topbar-add-btn.is-loading {
+    pointer-events: none;
+    background: linear-gradient(
+      110deg,
+      var(--accent) 35%,
+      color-mix(in srgb, #fff 28%, var(--accent)) 50%,
+      var(--accent) 65%
+    );
+    background-size: 200% 100%;
+    animation: btn-shimmer 1.6s ease-in-out infinite;
+  }
+
+  .topbar-add-btn {
+    height: 36px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 18px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.84rem;
+    font-weight: 600;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+    transition: background 0.12s;
+    transform: none;
+    letter-spacing: 0.01em;
+  }
+  .topbar-add-btn:hover { background: var(--accent-dark); transform: none; }
+  body.dark-mode .topbar-add-btn,
+  body.dark-mode .topbar-add-btn:hover { color: var(--bg); }
+
+  /* Right: auth + theme */
+  .hero-actions {
+    position: static;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 20px;
+    flex-wrap: nowrap;
+    height: 100%;
+  }
+
+  /* Floating bulk bar desktop position is defined in layout-chrome.css
+     (must come AFTER this file in main.css cascade to win) */
+
+  /* Scroll target offset: fixed topbar covers element if scroll-margin-top is not set */
+  .paper-card,
+  .library-panel {
+    scroll-margin-top: calc(var(--topbar-h) + 8px);
+  }
+}
+
+/* Scroll buttons: keep inside page boundary on desktop */
+@media (min-width: 701px) {
+  .scroll-top-button,
+  .scroll-buttons-stack {
+    right: calc(var(--page-side) + 18px);
+  }
+}
+
+/* Small desktop (701-1100px): no sidebar offset on content + topbar tweaks */
+@media (min-width: 701px) and (max-width: 1100px) {
+  .content-wrap {
+    margin-left: var(--page-side);
+  }
+  .hero-brand { padding: 0 14px 0 16px; }
+  .hero-topbar-search { padding: 0 8px; gap: 6px; }
+  .hero-actions { padding: 0 12px; gap: 8px; }
+  .topbar-fetch-btn { padding: 0 10px; }
+  .topbar-add-btn { padding: 0 10px; }
+}
+
+/* Large desktop (≥1101px): sidebar always visible, brand mark click is no-op */
+@media (min-width: 1101px) {
+  button.hero-brand-mark { cursor: default; }
+}
