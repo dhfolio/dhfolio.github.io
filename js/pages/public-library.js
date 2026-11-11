@@ -7,8 +7,8 @@
  * GET /api/profiles/{slug}/library — the backend blanks notes/pdfPath.
  */
 
-import { apiJson } from "../api.js?v=1.0.3";
-import { navigate, profilePath } from "../router.js?v=1.0.3";
+import { apiJson } from "../api.js?v=1.0.4";
+import { navigate, profilePath } from "../router.js?v=1.0.4";
 
 const container = () => document.getElementById("public-library");
 

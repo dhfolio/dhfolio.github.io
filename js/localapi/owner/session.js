@@ -9,13 +9,13 @@
  * one per browser, and two tabs writing it would undo each other.
  */
 
-import { createGitHub } from "./github.js?v=1.0.3";
-import { createStore } from "./store.js?v=1.0.3";
-import { deleteCache, idbCache } from "./idb.js?v=1.0.3";
-import { cacheJournalStorage, createJournal } from "./journal.js?v=1.0.3";
-import { createCommitter } from "./committer.js?v=1.0.3";
-import { createEditor } from "./editor.js?v=1.0.3";
-import { applyFile } from "../shared/dataset.js?v=1.0.3";
+import { createGitHub } from "./github.js?v=1.0.4";
+import { createStore } from "./store.js?v=1.0.4";
+import { deleteCache, idbCache } from "./idb.js?v=1.0.4";
+import { cacheJournalStorage, createJournal } from "./journal.js?v=1.0.4";
+import { createCommitter } from "./committer.js?v=1.0.4";
+import { createEditor } from "./editor.js?v=1.0.4";
+import { applyFile } from "../shared/dataset.js?v=1.0.4";
 
 export const TOKEN_KEY = "atlas-gh-token";
 
@@ -60,7 +60,13 @@ export async function startOwner({ cfg, fetch }) {
     }).catch((err) => { ready = null; throw err; }));
 
     const readOnly = await editLock();
-    const editor = createEditor({ dataset, journal, committer, readOnly });
+    const editor = createEditor({ dataset, journal, committer, readOnly, hasMedia: (p) => store.has(p) });
+    // A photo not committed yet is served from the journal.
+    const mediaDataUrl = async (path) => {
+      const pending = journal.entries().find(([p]) => p === path)?.[1];
+      if (pending && typeof pending === "object") return `data:${pending.mime};base64,${pending.base64}`;
+      return store.mediaDataUrl(path);
+    };
 
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "hidden" && journal.size) committer.flush();
@@ -79,7 +85,7 @@ export async function startOwner({ cfg, fetch }) {
       owner: {
         dataset,
         snapshot: () => store.snapshot(),
-        mediaDataUrl: (path) => store.mediaDataUrl(path),
+        mediaDataUrl,
         editor,
       },
     };

@@ -10,8 +10,8 @@
  * DOM-free: `gh` (github.js), `cache` ({get,set}) and `onProgress` are injected.
  */
 
-import { applyFile, datasetFromFiles, isDatasetPath } from "../shared/dataset.js?v=1.0.3";
-import { bytesToBase64 } from "./github.js?v=1.0.3";
+import { applyFile, datasetFromFiles, isDatasetPath } from "../shared/dataset.js?v=1.0.4";
+import { bytesToBase64 } from "./github.js?v=1.0.4";
 
 const BATCH = 100;
 const REST_CONCURRENCY = 6;
@@ -92,6 +92,10 @@ export function createStore({ gh, cache, onProgress = () => {}, branch = "main" 
     async snapshot() {
       await store.dataset();
       return snapshot;
+    },
+    /** Whether the loaded tree has this path (false before the first load). */
+    has(path) {
+      return Boolean(snapshot && snapshot.tree.has(path));
     },
     /** After our own commit landed: the dataset already holds those edits. */
     setBase({ commit, treeSha, tree }) {

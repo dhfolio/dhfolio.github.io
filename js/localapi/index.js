@@ -10,9 +10,10 @@
  * (owner/session.js): owner GETs are answered from the private dataset.
  */
 
-import { publicRoutes } from "./routes-public.js?v=1.0.3";
-import { ownerRead } from "./owner/routes-read.js?v=1.0.3";
-import { ownerWrite } from "./owner/routes-write.js?v=1.0.3";
+import { publicRoutes } from "./routes-public.js?v=1.0.4";
+import { ownerRead } from "./owner/routes-read.js?v=1.0.4";
+import { ownerWrite } from "./owner/routes-write.js?v=1.0.4";
+import { ownerWriteProfile } from "./owner/routes-profile.js?v=1.0.4";
 
 const routes = [...publicRoutes];
 
@@ -24,13 +25,14 @@ export async function handle({ method, path, body, ownerSlug, fetch, owner }) {
     const url = new URL(path, "http://local");
     const ctx = { method, pathname: url.pathname, query: url.searchParams, body, ownerSlug, fetch, owner, editor: owner?.editor };
     if (owner) {
-      const result = (await ownerRead(ctx)) || (await ownerWrite(ctx));
+      const result = (await ownerRead(ctx)) || (await ownerWrite(ctx)) || (await ownerWriteProfile(ctx));
       if (result) return result;
       if (method === "PUT" && url.pathname === "/api/state") {
         // The original replaced every record (state_repository.py:27-91); never here.
         return { status: 405, body: { detail: "Saving the whole library at once is not supported." } };
       }
-      if (method !== "GET") return { status: 501, body: { detail: "Not available on this site yet." } };
+      // Not ported (plan): username changes, CSV/Scholar imports, PDF uploads, Scholar citations.
+      if (method !== "GET") return { status: 501, body: { detail: "Not available on this site." } };
     }
     for (const route of routes) {
       const result = await route(ctx);

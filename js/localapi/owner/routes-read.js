@@ -9,8 +9,8 @@
  * }
  */
 
-import { byDesc, project, yearOnly } from "../shared/projection.js?v=1.0.3";
-import { lookupMetadata } from "./metadata.js?v=1.0.3";
+import { byDesc, project, yearOnly } from "../shared/projection.js?v=1.0.4";
+import { lookupMetadata } from "./metadata.js?v=1.0.4";
 
 // While the old site runs, its lookup still has what the browser cannot get:
 // abstracts scraped from publisher pages (doi.org → publisher has no CORS).
@@ -265,6 +265,18 @@ export async function ownerRead(ctx) {
       break;
   }
 
+  if ((m = /^\/api\/(talks|recognitions)\/([^/]+)$/.exec(path))) {
+    const id = decodeURIComponent(m[2]);
+    const rec = (await owner.dataset())[m[1]].find((r) => String(r.id) === id && live(r));
+    return rec ? ok(rec) : notFound(m[1] === "talks" ? "Talk not found." : "Recognition not found.");
+  }
+  if ((m = /^\/api\/news\/([^/]+)$/.exec(path))) {
+    const id = decodeURIComponent(m[1]);
+    const item = (await owner.dataset()).news.find((n) => String(n.id) === id && live(n));
+    if (!item) return notFound("News item not found.");
+    const { deletedAt, ...rest } = item;
+    return ok({ ...rest, images: await Promise.all((rest.images || []).map(async (img) => ({ ...img, src: await withMedia(owner, img.src) }))) });
+  }
   if ((m = /^\/api\/citations\/references\/([^/]+)$/.exec(path))) {
     return ok(referencesFor(await owner.dataset(), decodeURIComponent(m[1])));
   }

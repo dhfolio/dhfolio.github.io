@@ -5,9 +5,10 @@
  * and asks the committer to save soon.
  */
 
-import { applyFile, recordPath, toJson } from "../shared/dataset.js?v=1.0.3";
+import { applyFile, recordPath, toJson } from "../shared/dataset.js?v=1.0.4";
+import { MEDIA_PATH, mediaPathFor, parseImageDataUrl } from "../shared/media.js?v=1.0.4";
 
-export function createEditor({ dataset, journal, committer, readOnly = "" }) {
+export function createEditor({ dataset, journal, committer, readOnly = "", hasMedia = () => false }) {
   const store = { dataset };
   async function write(path, text) {
     const ds = await store.dataset();
@@ -43,6 +44,21 @@ export function createEditor({ dataset, journal, committer, readOnly = "" }) {
       const ds = await store.dataset();
       const path = ds.paths.get(`references:${paperId}`);
       if (path) await write(path, null);
+    },
+    /**
+     * An image value from a request → "media/<hash>.<ext>". Uploaded data URLs
+     * are queued once (an image already stored or queued is not sent again);
+     * "media/…" paths we handed out are kept as they are.
+     */
+    async putMedia(src) {
+      const value = String(src || "");
+      if (MEDIA_PATH.test(value)) return value;
+      const path = await mediaPathFor(value);
+      if (!hasMedia(path) && !journal.has(path)) {
+        const { mime, base64 } = parseImageDataUrl(value);
+        await journal.set(path, { mime, base64 });
+      }
+      return path;
     },
     /** A deliberate bulk deletion the user already confirmed (empty Bin, bulk delete). */
     allowMassDelete() {

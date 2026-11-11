@@ -5,9 +5,9 @@
  * ctx.editor (owner/editor.js) is the only thing that changes data.
  */
 
-import { manualLinksFor } from "./routes-read.js?v=1.0.3";
-import { fetchReferences } from "./references.js?v=1.0.3";
-import { HttpError, normalizePaper, parseBody, sortCasefold, tagName, utcNow } from "../shared/payload.js?v=1.0.3";
+import { manualLinksFor } from "./routes-read.js?v=1.0.4";
+import { fetchReferences } from "./references.js?v=1.0.4";
+import { HttpError, normalizePaper, parseBody, sortCasefold, tagName, utcNow } from "../shared/payload.js?v=1.0.4";
 
 const ok = (body) => ({ status: 200, body });
 const noContent = () => ({ status: 204, body: null });
@@ -15,16 +15,16 @@ const live = (r) => r && !r.deletedAt;
 const ids = (v) => (Array.isArray(v) ? v.map(String) : []);
 const tagRead = (t) => ({ id: t.id, name: t.name, created_at: t.createdAt, updated_at: t.updatedAt });
 const profileTagRead = (t) => ({ id: t.id, name: t.name, scope: t.scope, created_at: t.createdAt, updated_at: t.updatedAt });
-const nextId = (list) => list.reduce((m, t) => Math.max(m, Number(t.id) || 0), 0) + 1;
+export const nextId = (list) => list.reduce((m, t) => Math.max(m, Number(t.id) || 0), 0) + 1;
 
 /** common.ensure_tags / ensure_profile_tags: create the tag rows a saved record names. */
-async function ensureTags(editor, ds, names, now) {
+export async function ensureTags(editor, ds, names, now) {
   for (const name of names) {
     if (ds.tags.some((t) => t.name === name)) continue;
     await editor.put("tags", { id: nextId(ds.tags), name, createdAt: now, updatedAt: now });
   }
 }
-async function ensureProfileTags(editor, ds, names, scope, now) {
+export async function ensureProfileTags(editor, ds, names, scope, now) {
   for (const name of names) {
     if (ds.profileTags.some((t) => t.name === name && (t.scope || "general") === scope)) continue;
     await editor.put("profile-tags", { id: nextId(ds.profileTags), name, scope, createdAt: now, updatedAt: now });
@@ -73,7 +73,7 @@ export function collectReferences(editor, ds, paper, fetch) {
     .catch((err) => { console.warn("[references]", paper.id, err); });
 }
 
-const uuid = () => (globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID()
+export const uuid = () => (globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID()
   : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) => (c ^ (Math.random() * 16) >> (c / 4)).toString(16)));
 
 export async function ownerWrite(ctx) {

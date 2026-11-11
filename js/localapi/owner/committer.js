@@ -55,7 +55,8 @@ export function createCommitter({
   }
 
   const message = (entries) => {
-    const names = entries.map(([p, t]) => `${t === null ? "-" : ""}${p}`);
+    const names = entries.filter(([p]) => !p.startsWith("media/")).map(([p, t]) => `${t === null ? "-" : ""}${p}`);
+    if (!names.length) names.push(...entries.map(([p]) => p));
     return `edit: ${names.slice(0, 3).join(", ")}${names.length > 3 ? ` (+${names.length - 3})` : ""}`;
   };
 
@@ -66,6 +67,9 @@ export function createCommitter({
       for (const [path, text] of entries) {
         if (text === null) {
           if (snap.tree.has(path)) tree.push({ path, mode: "100644", type: "blob", sha: null });
+        } else if (typeof text === "object") {
+          // A photo ({base64}): binary, so it is a blob of its own; skipped if the tree already has it.
+          if (!snap.tree.has(path)) tree.push({ path, mode: "100644", type: "blob", sha: await gh.createBlobBase64(text.base64) });
         } else {
           tree.push({ path, mode: "100644", type: "blob", content: text });
         }
