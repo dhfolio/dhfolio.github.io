@@ -1,0 +1,6 @@
+The site's data (data/public/, media/) is published from the private
+repository dhfolio/atlas-data by its publish workflow, which pushes here with
+a deploy key. tools/sync-public.mjs refuses to run while this file exists.
+
+Roll back to mirroring researchatlas.io: revert the commit that added this
+file (it also restores the scheduled sync in .github/workflows/pages.yml).

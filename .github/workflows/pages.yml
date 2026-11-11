@@ -1,19 +1,17 @@
 name: pages
 
+# Builds and deploys the site on every push to main. Since the Phase 2
+# cutover, data/public/ and media/ are written by dhfolio/atlas-data's publish
+# workflow (a deploy-key push, which starts this workflow), not by a
+# scheduled mirror of researchatlas.io. See .publish-enabled.
+
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: '23 */6 * * *'
   workflow_dispatch:
-    inputs:
-      force:
-        description: Override the sync shrink guard
-        type: boolean
-        default: false
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -23,7 +21,7 @@ concurrency:
 
 jobs:
   deploy:
-    # A manual run can be started from any ref; only main is ever synced or deployed.
+    # A manual run can be started from any ref; only main is ever deployed.
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -31,34 +29,13 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      # Branch tip rather than the event SHA: a push run that queued behind a sync run must not redeploy older data.
+      # Branch tip rather than the event SHA: a run that queued behind another must not deploy older data.
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.ref }}
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      # A push made with GITHUB_TOKEN does not start another workflow run, so sync and deploy share this one.
-      - name: Sync mirror
-        if: github.event_name != 'push'
-        run: node tools/sync-public.mjs ${{ inputs.force && '--force' || '' }}
-      - name: Commit sync
-        if: github.event_name != 'push'
-        run: |
-          mkdir -p data/public media
-          if [ -n "$(git status --porcelain data/public media)" ]; then
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add -A data/public media
-            git commit -m 'data: sync from researchatlas.io'
-            # A human push can land between the rebase and the push; retry instead of losing the sync.
-            for attempt in 1 2 3; do
-              git pull --rebase origin "$GITHUB_REF_NAME"
-              git push origin "HEAD:$GITHUB_REF_NAME" && break
-              [ "$attempt" -lt 3 ] || exit 1
-              sleep 5
-            done
-          fi
       - name: Build
         run: node tools/build-site.mjs
       - uses: actions/configure-pages@v6

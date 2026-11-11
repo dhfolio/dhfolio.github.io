@@ -47,8 +47,8 @@ async function main() {
   }
   const out = resolve(opt.out ?? join(dirname(fileURLToPath(import.meta.url)), '..'));
   // After the Phase 2 cutover atlas-data publishes data/public; mirroring the old site would overwrite it.
-  if (await access(join(out, 'data/public/.publish-enabled')).then(() => true, () => false)) {
-    throw new Error('data/public/.publish-enabled exists: this site is published from atlas-data, not mirrored');
+  if (await access(join(out, '.publish-enabled')).then(() => true, () => false)) {
+    throw new Error('.publish-enabled exists: this site is published from atlas-data, not mirrored');
   }
   const api =`${opt.base.replace(/\/+$/, '')}/api/profiles/${encodeURIComponent(opt.slug)}`;
   const urls = [api, `${api}/news`, `${api}/library`, `${api}/graph?scope=all`, `${api}/graph?scope=mine`, `${api}/graph?scope=library`];
