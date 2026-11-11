@@ -7,7 +7,7 @@
  * shaped like the FastAPI responses ({detail} on errors).
  */
 
-import { publicRoutes } from "./routes-public.js?v=1.0.0";
+import { publicRoutes } from "./routes-public.js?v=1.0.1";
 
 const routes = [...publicRoutes];
 

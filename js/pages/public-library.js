@@ -7,8 +7,8 @@
  * GET /api/profiles/{slug}/library — the backend blanks notes/pdfPath.
  */
 
-import { apiJson } from "../api.js?v=1.0.0";
-import { navigate, profilePath } from "../router.js?v=1.0.0";
+import { apiJson } from "../api.js?v=1.0.1";
+import { navigate, profilePath } from "../router.js?v=1.0.1";
 
 const container = () => document.getElementById("public-library");
 
@@ -25,9 +25,10 @@ let sortField = "addedAt"; // addedAt | year | title
 let expandedIds = new Set();
 
 function escapeHtml(t) {
-  return String(t == null ? "" : t)
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return window.RAEscape.escapeHtml(t == null ? "" : t);
 }
+
+const safeHref = (url) => window.RAEscape.safeHref(url);
 
 function titleHtml(title) {
   const text = String(title || "");
@@ -97,7 +98,7 @@ function renderCard(p) {
   const summary = String(p.summary || "").trim();
   const links = [];
   if (p.doi) links.push(`<a href="https://doi.org/${escapeHtml(p.doi)}" target="_blank" rel="noopener noreferrer">DOI</a>`);
-  if (p.url) links.push(`<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer">Link</a>`);
+  if (safeHref(p.url)) links.push(`<a href="${escapeHtml(safeHref(p.url))}" target="_blank" rel="noopener noreferrer">Link</a>`);
   return `
     <article class="plib-card${isExpanded ? " is-expanded" : ""}" data-id="${escapeHtml(p.id)}">
       <div class="plib-topline">${topline}</div>

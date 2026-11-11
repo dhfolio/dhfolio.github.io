@@ -45,3 +45,13 @@ body:not(.is-authenticated) .mobile-nav-inner {
 .profile-page.is-public .paper-meta .paper-delete {
   display: none !important;
 }
+
+/* Replaces an inline style="" (the page CSP has no 'unsafe-inline'). */
+.scholar-cancel-btn-spaced {
+  margin-top: 6px;
+}
+
+/* Owner entry point in the footer: quiet, same look as the footer text. */
+.footer-owner-link {
+  color: inherit;
+}

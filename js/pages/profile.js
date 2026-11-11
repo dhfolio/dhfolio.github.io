@@ -7,10 +7,10 @@
  * GET /api/profiles/:slug. See renderPublicProfile() at bottom of file.
  */
 
-import { apiJson, apiFetch, postJson, putJson, patchJson, deleteRequest } from "../api.js?v=1.0.0";
-import { isValidSlug as _isValidSlugClient, isReserved as _isReservedClient } from "../utils/reserved-usernames.js?v=1.0.0";
-import { canonicalizeProfileUrl, navigateToPaper, profilePath } from "../router.js?v=1.0.0";
-import { renderToolbar as renderRichTextToolbar, renderBodyText, wireRichText } from "../components/richtext.js?v=1.0.0";
+import { apiJson, apiFetch, postJson, putJson, patchJson, deleteRequest } from "../api.js?v=1.0.1";
+import { isValidSlug as _isValidSlugClient, isReserved as _isReservedClient } from "../utils/reserved-usernames.js?v=1.0.1";
+import { canonicalizeProfileUrl, navigateToPaper, profilePath } from "../router.js?v=1.0.1";
+import { renderToolbar as renderRichTextToolbar, renderBodyText, wireRichText } from "../components/richtext.js?v=1.0.1";
 
 
 // ── Social link icons (Simple Icons / monochrome inline SVGs) ──────────────
@@ -53,7 +53,7 @@ function renderSocialLinksRow() {
     ["instagram", profile.instagramUrl, "Instagram"],
     ["x",         profile.xUrl,         "X"],
     ["youtube",   profile.youtubeUrl,   "YouTube"],
-  ].filter(([, url]) => url);
+  ].map(([key, url, title]) => [key, safeHref(url), title]).filter(([, url]) => url);
   if (!socials.length) return "";
   return `<div class="profile-links-row">${socials.map(([key, url, title]) =>
     `<a class="profile-social-link" href="${escapeHtml(url)}" target="_blank" rel="noopener" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">${SOCIAL_ICON_PATHS[key]}</a>`
@@ -301,7 +301,7 @@ function openAvatarCropModal(img, done) {
     <div class="avatar-crop-modal" role="dialog" aria-modal="true" aria-label="Adjust photo">
       <div class="avatar-crop-title">Adjust photo</div>
       <div class="avatar-crop-stage">
-        <div class="avatar-crop-viewport" style="width:${VP}px;height:${VP}px">
+        <div class="avatar-crop-viewport">
           <img class="avatar-crop-img" alt="" draggable="false">
           <div class="avatar-crop-mask" aria-hidden="true"></div>
         </div>
@@ -318,6 +318,8 @@ function openAvatarCropModal(img, done) {
       </div>
     </div>`;
   document.body.appendChild(backdrop);
+  // CSSOM, not a style="" attribute: the page CSP has no 'unsafe-inline'.
+  Object.assign(backdrop.querySelector(".avatar-crop-viewport").style, { width: `${VP}px`, height: `${VP}px` });
 
   const imgEl = backdrop.querySelector(".avatar-crop-img");
   const range = backdrop.querySelector(".avatar-crop-zoom-range");
@@ -411,8 +413,10 @@ function openAvatarCropModal(img, done) {
 
 // ── Format helpers ──────────────────────────────────────────────────────────
 function escapeHtml(t) {
-  return String(t || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return window.RAEscape.escapeHtml(t || "");
 }
+
+const safeHref = (url) => window.RAEscape.safeHref(url);
 
 const badges = () => window.__authorBadges || null;
 
@@ -1047,7 +1051,7 @@ function renderExtraLinksSection(card, paper, isExpanded) {
       const a = document.createElement("a");
       a.className = "paper-extra-link-chip";
       a.textContent = `[${lnk.label || lnk.url || "link"}]`;
-      if (lnk.url) { a.href = lnk.url; a.target = "_blank"; a.rel = "noopener"; }
+      if (safeHref(lnk.url)) { a.href = safeHref(lnk.url); a.target = "_blank"; a.rel = "noopener"; }
       a.title = lnk.url || "";
       wrap.appendChild(a);
 
@@ -1266,7 +1270,7 @@ function renderScholarImportSection(inline = false) {
         <button class="scholar-import-btn scholar-quick-btn" id="scholar-hint-submit-btn" type="button">Search</button>
       </div>
       ${scholarError ? `<p class="scholar-import-error">${escapeHtml(scholarError)}</p>` : ""}
-      <button class="scholar-cancel-btn" id="scholar-cancel-btn" type="button" style="margin-top:6px">Cancel</button>
+      <button class="scholar-cancel-btn scholar-cancel-btn-spaced" id="scholar-cancel-btn" type="button">Cancel</button>
     `;
   } else if (scholarState === "fetching") {
     const steps = SCHOLAR_PROGRESS_STEPS.slice(0, scholarProgressStep + 1);
@@ -2297,7 +2301,7 @@ function renderPaperCard(p, numberLabel) {
       const buildMarkup = window.__appBuildCitationMarkup;
       const copy = window.__appCopyToClipboard;
       const citationText = buildText ? buildText(p) : "";
-      const paperUrl = (p.url && String(p.url).trim()) || (p.doi ? `https://doi.org/${p.doi}` : "");
+      const paperUrl = safeHref(p.url) || (p.doi ? `https://doi.org/${p.doi}` : "");
       const hasDoi = !!(p.doi && String(p.doi).trim());
       citationRow.hidden = !(citationText || hasDoi || paperUrl);
       const citationEl = citationRow.querySelector(".paper-citation");
@@ -2307,7 +2311,8 @@ function renderPaperCard(p, numberLabel) {
       const doiCopyBtn = citationRow.querySelector('button[data-copy-kind="doi"]');
       const linkCopyBtn = citationRow.querySelector('button[data-copy-kind="link"]');
       if (citationText && citationEl) {
-        citationEl.innerHTML = buildMarkup ? buildMarkup(p) : citationText;
+        if (buildMarkup) citationEl.innerHTML = buildMarkup(p);
+        else citationEl.textContent = citationText;
         citationEl.hidden = false;
         const doCopyCite = (ev) => {
           ev?.stopPropagation?.();
@@ -3595,7 +3600,7 @@ function renderAchievementCard(slot, opts) {
       : `<span>${fmtNum(slot.progress.value)}</span><span>${fmtNum(slot.progress.nextTarget)}</span>`;
     progressHtml = `
       <div class="achv-progress">
-        <div class="achv-progress-bar"><div class="achv-progress-fill" style="width:${pct}%"></div></div>
+        <div class="achv-progress-bar"><div class="achv-progress-fill" data-pct="${pct}"></div></div>
         <div class="achv-progress-text">${progText}</div>
       </div>`;
   } else if (slot.series === "single-paper-cit" && tiedCount >= 2) {
@@ -3665,7 +3670,7 @@ function renderAchievementModal() {
   const summaryHtml = isAtlas ? `
     <div class="achv-summary">
       <span class="achv-summary-label">${groupResult.summary.unlocked} / ${groupResult.summary.total} unlocked</span>
-      <div class="achv-summary-bar"><div class="achv-summary-bar-fill" style="width:${groupResult.summary.percentage}%"></div></div>
+      <div class="achv-summary-bar"><div class="achv-summary-bar-fill" data-pct="${Number(groupResult.summary.percentage) || 0}"></div></div>
     </div>
   ` : "";
 
@@ -4151,6 +4156,8 @@ function render() {
     ${journalOrderModalOpen ? renderJournalOrderModalHtml() : ""}
     ${tagOrderModalOpen ? renderTagOrderModalHtml() : ""}
   `;
+  // Bar widths go through CSSOM: the page CSP blocks style="" attributes.
+  el.querySelectorAll("[data-pct]").forEach((bar) => { bar.style.width = `${Number(bar.dataset.pct) || 0}%`; });
 
   // Wire tabs
   el.querySelectorAll(".profile-tabs [data-tab]").forEach(btn => {
@@ -4957,7 +4964,7 @@ function render() {
   // Sync expandable affiliations after DOM insertion
   list.forEach(p => {
     if (!expandedPaperIds.has(p.id)) return;
-    const card = listEl.querySelector(`.paper-card[data-paper-id="${p.id}"]`);
+    const card = listEl.querySelector(`.paper-card[data-paper-id="${CSS.escape(String(p.id))}"]`);
     if (!card) return;
     const affEl = card.querySelector(".paper-affiliations");
     const affBtn = card.querySelector(".paper-affiliations-toggle");
@@ -4971,7 +4978,7 @@ function render() {
     const targetId = pendingScrollPaperId;
     pendingScrollPaperId = "";
     requestAnimationFrame(() => {
-      const card = listEl.querySelector(`.paper-card[data-paper-id="${targetId}"]`);
+      const card = listEl.querySelector(`.paper-card[data-paper-id="${CSS.escape(String(targetId))}"]`);
       if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
     });
   }
@@ -4981,7 +4988,7 @@ function render() {
     pendingScrollEditFormId = "";
     requestAnimationFrame(() => {
       const form = listEl.querySelector(
-        `.paper-card[data-paper-id="${targetId}"] .profile-edit-form-inline`
+        `.paper-card[data-paper-id="${CSS.escape(String(targetId))}"] .profile-edit-form-inline`
       );
       if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
     });
@@ -5112,9 +5119,7 @@ function paperPdfHref(p) {
   const path = String(p.pdfPath || "").trim();
   if (!path) return "";
   if (/^[a-zA-Z]:\\/.test(path)) return `file:///${path.replace(/\\/g, "/")}`;
-  if (/^https?:\/\//i.test(path)) return path;
-  if (path.startsWith("/uploads/") || path.startsWith("/")) return path;
-  return path;
+  return safeHref(path);
 }
 
 function talkPdfHref(t) {
@@ -5209,10 +5214,10 @@ function renderTalkCard(talk) {
     topline.appendChild(typeBadge);
   }
   const venueText = talk.venue || (talk.location ? talk.location : "Venue unknown");
-  if (isExpanded && talk.venueUrl) {
+  if (isExpanded && safeHref(talk.venueUrl)) {
     const a = document.createElement("a");
     a.className = "paper-journal profile-talk-venue-link";
-    a.href = talk.venueUrl;
+    a.href = safeHref(talk.venueUrl);
     a.target = "_blank";
     a.rel = "noreferrer noopener";
     a.textContent = venueText;
@@ -5278,16 +5283,16 @@ function renderTalkCard(talk) {
         label.className = "profile-talk-inviter-label";
         label.textContent = "Invited by ";
         metaLine.appendChild(label);
-        if (talk.inviterUrl) {
+        if (safeHref(talk.inviterUrl)) {
           const a = document.createElement("a");
-          a.href = talk.inviterUrl;
+          a.href = safeHref(talk.inviterUrl);
           a.target = "_blank";
           a.rel = "noreferrer noopener";
           a.textContent = talk.inviter || talk.inviterUrl;
           metaLine.appendChild(a);
         } else {
           const span = document.createElement("span");
-          span.textContent = talk.inviter;
+          span.textContent = talk.inviter || talk.inviterUrl;
           metaLine.appendChild(span);
         }
         needSep = true;
@@ -5330,10 +5335,10 @@ function renderTalkCard(talk) {
     }
     meta.appendChild(pdfLink);
 
-    if (talk.talkLink) {
+    if (safeHref(talk.talkLink)) {
       const extLink = document.createElement("a");
       extLink.className = "paper-pdf-link";
-      extLink.href = talk.talkLink;
+      extLink.href = safeHref(talk.talkLink);
       extLink.target = "_blank";
       extLink.rel = "noreferrer noopener";
       extLink.textContent = "Link";

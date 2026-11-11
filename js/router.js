@@ -5,6 +5,7 @@
  * With RESEARCH_ATLAS_CONFIG.ownerSlug set (single-owner site):
  *   /              – Profile
  *   /news /library /maps – the owner's News, Library and Maps
+ *   /bin           – Bin, only once the owner is unlocked (visitors → /)
  *   (legacy /<owner>/… paths are rewritten on entry)
  *
  * URL scheme without an owner slug (multi-user service, no hash):
@@ -18,7 +19,7 @@
  *   /<slug>/news   – Public/owner news at that slug
  */
 
-import { isValidSlug as isUsernameValid, isReserved } from "./utils/reserved-usernames.js?v=1.0.0";
+import { isValidSlug as isUsernameValid, isReserved } from "./utils/reserved-usernames.js?v=1.0.1";
 
 const PAGES = ["library", "bin", "profile", "news", "maps"];
 // Pages that also exist under a slug, as /<slug>/<page>.
@@ -59,10 +60,11 @@ export function registerPage(name, mod) {
 function parsePath() {
   const raw = window.location.pathname.replace(/^\/+|\/+$/g, "");
   if (OWNER) {
-    // Legacy /<owner> and /<owner>/<sub> resolve too; anything unknown
-    // (including /bin, which has no visitor view) is the profile.
+    // Legacy /<owner> and /<owner>/<sub> resolve too; anything unknown is the
+    // profile. /bin is owner-only: showPage sends visitors on to the profile.
     const rest = ownerSegments(raw.split("/").filter(Boolean));
     if (rest.length === 1 && SLUG_SUBPAGES.includes(rest[0])) return { page: rest[0], slug: OWNER };
+    if (rest.length === 1 && rest[0] === "bin") return { page: "bin", slug: null };
     return { page: "profile", slug: OWNER };
   }
   if (!raw) return { page: "library", slug: null };
@@ -96,9 +98,10 @@ function routeToPath(route) {
   const trimmed = String(route).replace(/^\/+|\/+$/g, "");
   if (!trimmed) return "/";
   if (OWNER) {
-    // "profile", "profile/<owner>", "<owner>" → "/";  "<owner>/news", "news" → "/news"
+    // "profile", "profile/<owner>", "<owner>" → "/";  "<owner>/news", "news" → "/news";  "bin" → "/bin"
     const rest = ownerSegments(trimmed.split("/").filter(Boolean));
-    return rest.length === 1 && SLUG_SUBPAGES.includes(rest[0]) ? "/" + rest[0] : "/";
+    if (rest.length === 1 && (SLUG_SUBPAGES.includes(rest[0]) || rest[0] === "bin")) return "/" + rest[0];
+    return "/";
   }
   // "profile/<slug>" → "/<slug>"
   if (trimmed.startsWith("profile/")) {
@@ -148,6 +151,15 @@ export function getCurrentPage() {
 
 /** Show a page by base name, hiding all others. */
 export async function showPage(pageName, slug = null) {
+  // Bin exists only for the unlocked owner. Who that is is known only after the
+  // session check, so wait for it; everyone else lands on the profile.
+  if (OWNER && pageName === "bin") {
+    try { await window.__appInitPromise; } catch { /* treated as a visitor below */ }
+    if (String(window.__appAuthSlug || "").toLowerCase() !== OWNER) {
+      window.history.replaceState({}, "", "/");
+      return showPage("profile", OWNER);
+    }
+  }
   // Hide Library-specific overlays when leaving Library
   if (pageName !== "library") {
     const bar = document.getElementById("floating-bulk-actions-bar");
@@ -229,8 +241,8 @@ export function initRouter() {
     }
   }
 
-  // Rewrite legacy and unknown entry paths (/<owner>/news, /profile, /bin,
-  // /news/) to their canonical form. Runs after the hash migration above so
+  // Rewrite legacy and unknown entry paths (/<owner>/news, /profile, /news/)
+  // to their canonical form. /bin stays; showPage decides who may see it. Runs after the hash migration above so
   // that handoff still sees the hash; the query survives for ?paper= links.
   if (OWNER) {
     const canonical = routeToPath(window.location.pathname);

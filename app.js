@@ -11,14 +11,20 @@
   } catch {}
 })();
 
-const STORAGE_KEY = "paper-sensing-app-state-v2";
-const LEGACY_STORAGE_KEY = "paper-sensing-app-state-v1";
 const THEME_STORAGE_KEY = "paper-sensing-app-theme";
-const STORAGE_MODE_KEY = "paper-sensing-app-storage-mode";
 const AUTH_TOKEN_STORAGE_KEY = "research-atlas-auth-token";
+// Keys of the removed localStorage mode. Dropped on every load so no stale copy
+// of the library lingers in this browser.
+["paper-sensing-app-state-v2", "paper-sensing-app-state-v1", "paper-sensing-app-storage-mode"].forEach((key) => {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+      const k = localStorage.key(i);
+      if (k === key || k.startsWith(`${key}-user-`)) localStorage.removeItem(k);
+    }
+  } catch {}
+});
 const runtimeConfig = window.RESEARCH_ATLAS_CONFIG || {};
 const API_BASE = resolveApiBase(runtimeConfig.apiBase);
-const BACKEND_SAVE_DELAY_MS = 250;
 const LONG_PRESS_SELECTION_MS = 420;
 const expandedPaperIds = new Set();
 const selectedPaperIds = new Set();
@@ -34,9 +40,8 @@ let manualDraftTags = [];
 let pendingLookupMetadata = null;
 let libraryTagFilters = new Set();
 let selectionAnchorId = "";
-let activeStorageMode = "local";
-let pendingSaveTimeout = 0;
-let pendingSaveRequest = Promise.resolve();
+// Always the API. The "local" branches left in this file are dead (Phase 3 removes them).
+const activeStorageMode = "backend";
 let pendingScrollPaperId = "";
 let justAddedPaperId = "";
 let pendingEditReturnPaperId = "";
@@ -123,13 +128,6 @@ async function apiFetch(path, options = {}) {
   return fetch(`${API_BASE}${path}`, nextOptions);
 }
 
-function getScopedStorageKey() {
-  if (authSession.enabled && authSession.user?.id) {
-    return `${STORAGE_KEY}-user-${authSession.user.id}`;
-  }
-  return STORAGE_KEY;
-}
-
 function getApiOrigin() {
   try {
     return new URL(API_BASE).origin;
@@ -166,60 +164,13 @@ const JOURNAL_MAP = {
   "Science": "Science"
 };
 
-const localStorageAdapter = {
-  load() {
-    const scopedRaw = localStorage.getItem(getScopedStorageKey());
-    const legacyRaw = authSession.enabled && authSession.authenticated
-      ? ""
-      : localStorage.getItem(LEGACY_STORAGE_KEY);
-    const raw = scopedRaw || legacyRaw;
-    if (!raw) return getDefaultStateForCurrentSession();
-
-    try {
-      return normalizeState(JSON.parse(raw));
-    } catch {
-      return getDefaultStateForCurrentSession();
-    }
-  },
-  save(nextState) {
-    localStorage.setItem(getScopedStorageKey(), JSON.stringify(nextState));
-  },
-  hasStoredState() {
-    if (authSession.enabled && authSession.authenticated) {
-      return Boolean(localStorage.getItem(getScopedStorageKey()));
-    }
-    return Boolean(localStorage.getItem(getScopedStorageKey()) || localStorage.getItem(LEGACY_STORAGE_KEY));
-  }
-};
-
+// Read-only on purpose: there is no whole-state PUT (see loadState).
 const apiStorageAdapter = {
-  async isAvailable() {
-    try {
-      const response = await apiFetch("/api/health");
-      return response.ok;
-    } catch {
-      return false;
-    }
-  },
   async load() {
     const response = await apiFetch("/api/state");
     const payload = await response.json();
     if (!response.ok) {
       throw new Error(payload.detail || payload.error || "Backend state load failed.");
-    }
-    return normalizeState(payload);
-  },
-  async save(nextState) {
-    const response = await apiFetch("/api/state", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(nextState)
-    });
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(payload.detail || payload.error || "Backend state save failed.");
     }
     return normalizeState(payload);
   }
@@ -619,17 +570,6 @@ const DESKTOP_LOOKUP_PLACEHOLDER = "URL or DOI · https://... / 10.xxxx/...";
 let isMobileLibraryLayout = null;
 let activeTagActionChip = null;
 
-function hasMeaningfulState(input) {
-  return Boolean(
-    input
-    && (
-      input.papers?.length
-      || input.tags?.length
-      || input.profile?.notes?.trim()
-    )
-  );
-}
-
 function isDemoMode() {
   if (document.body.classList.contains("is-demo-edit")) return true;
   return Boolean(authSession?.enabled) && !Boolean(authSession?.authenticated);
@@ -846,6 +786,8 @@ async function refreshAuthSession() {
 
 function openAuthPopup() {
   const authUrl = authSession.authUrl || `${API_BASE}/api/auth/google/start`;
+  // Only ever open the sign-in flow of our own API origin.
+  if (!authUrl.startsWith(`${API_BASE}/`)) return;
   authPopup?.close?.();
   authPopup = window.open(
     authUrl,
@@ -874,46 +816,11 @@ async function logoutFromApp() {
   setAuthStatus("Signed out.", "status-ok");
 }
 
+// The API is the only store. There is deliberately no localStorage fallback and
+// no "bootstrap" write of a whole state: either would let one failed request
+// replace real data with a stale or empty copy.
 async function loadState() {
-  const localState = localStorageAdapter.load();
-  const preferBackend = localStorage.getItem(STORAGE_MODE_KEY) !== "local";
-  const backendAvailable = await apiStorageAdapter.isAvailable();
-
-  if (!backendAvailable) {
-    switchToLocalMode(null, "Backend unavailable. Using local fallback mode.");
-    return localState;
-  }
-
-  try {
-    const backendState = await apiStorageAdapter.load();
-    if (hasMeaningfulState(backendState)) {
-      activeStorageMode = "backend";
-      localStorage.setItem(STORAGE_MODE_KEY, "backend");
-      updateLocalCache(backendState);
-      return backendState;
-    }
-  } catch (error) {
-    console.warn("Backend state load failed. Falling back to local state.", error);
-  }
-
-  if (preferBackend || localStorageAdapter.hasStoredState()) {
-    try {
-      const bootstrappedState = hasMeaningfulState(localState)
-        ? localState
-        : getDefaultStateForCurrentSession();
-      const savedState = await apiStorageAdapter.save(bootstrappedState);
-      activeStorageMode = "backend";
-      localStorage.setItem(STORAGE_MODE_KEY, "backend");
-      updateLocalCache(savedState);
-      return savedState;
-    } catch (error) {
-      console.warn("Backend bootstrap failed. Falling back to local state.", error);
-    }
-  }
-
-  activeStorageMode = "backend";
-  localStorage.setItem(STORAGE_MODE_KEY, "backend");
-  return getDefaultStateForCurrentSession();
+  return apiStorageAdapter.load();
 }
 
 function applyTheme(theme) {
@@ -1017,40 +924,19 @@ function normalizePaper(paper) {
   return normalized;
 }
 
-function saveState() {
-  if (isDemoMode()) return;
-  const nextState = normalizeState(structuredClone(state));
-  updateLocalCache(nextState);
-}
+// Library state is never mirrored into localStorage any more. Kept as no-ops
+// so the many call sites stay untouched until the Phase 3 cleanup.
+function saveState() {}
 
-function updateLocalCache(nextState = state) {
-  if (isDemoMode()) return;
-  localStorageAdapter.save(normalizeState(structuredClone(nextState)));
-}
+function updateLocalCache() {}
 
-function switchToLocalMode(error, warningMessage = "Backend sync failed. Switched to local-only mode.") {
-  activeStorageMode = "local";
-  localStorage.setItem(STORAGE_MODE_KEY, "local");
-  console.warn(warningMessage, error);
-}
-
-function scheduleFullStateSync() {
+// A per-resource save failed. The old code fell back to PUT /api/state (a
+// destructive replace-all on the original backend) and then to local-only
+// mode; now the user is told and nothing else is written.
+function notifySaveFailed(error) {
   if (isDemoMode()) return;
-  if (activeStorageMode !== "backend") return;
-  if (pendingSaveTimeout) window.clearTimeout(pendingSaveTimeout);
-  pendingSaveTimeout = window.setTimeout(() => {
-    pendingSaveRequest = pendingSaveRequest
-      .catch(() => {})
-      .then(async () => {
-        try {
-          const savedState = await apiStorageAdapter.save(normalizeState(structuredClone(state)));
-          updateLocalCache(savedState);
-          state = normalizeState(savedState);
-        } catch (error) {
-          switchToLocalMode(error, "Backend state save failed. Switched to local-only mode.");
-        }
-      });
-  }, BACKEND_SAVE_DELAY_MS);
+  console.warn("Save failed.", error);
+  showAppToast(`Not saved: ${error?.message || "request failed"}. Reload and try again.`, 6000);
 }
 
 async function persistPaperResource(paper, method = "update") {
@@ -1070,7 +956,7 @@ async function persistPaperResource(paper, method = "update") {
   } catch (error) {
     if (paperPersistRevision.get(paper.id) !== revision) return;
     console.warn("Paper resource persistence failed. Falling back to full state sync.", error);
-    scheduleFullStateSync();
+    notifySaveFailed(error);
   }
 }
 
@@ -1083,7 +969,7 @@ async function persistProfileResource() {
     updateLocalCache();
   } catch (error) {
     console.warn("Profile resource persistence failed. Falling back to full state sync.", error);
-    scheduleFullStateSync();
+    notifySaveFailed(error);
   }
 }
 
@@ -1296,7 +1182,7 @@ function getPdfHref(paper) {
     if (/^[a-zA-Z]:\\/.test(paper.pdfPath)) {
       return `file:///${paper.pdfPath.replace(/\\/g, "/")}`;
     }
-    return paper.pdfPath;
+    return safeHref(paper.pdfPath);
   }
 
   const looksLikePdf = paper.sourceName && /\.pdf$/i.test(paper.sourceName);
@@ -1305,7 +1191,7 @@ function getPdfHref(paper) {
 }
 
 function getPaperExternalUrl(paper) {
-  const directUrl = String(paper.url || "").trim();
+  const directUrl = safeHref(paper.url);
   if (directUrl) return directUrl;
   return buildDoiUrl(paper.doi);
 }
@@ -1539,10 +1425,11 @@ function adjustPaperNoteHeight(card) {
 }
 
 function escapeHtml(text) {
-  return String(text || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return window.RAEscape.escapeHtml(text || "");
+}
+
+function safeHref(url) {
+  return window.RAEscape.safeHref(url);
 }
 
 function decodeHtmlEntities(text) {
@@ -2112,7 +1999,7 @@ async function deletePaper(paperId) {
       showAppToast("Moved to Bin");
     } catch (error) {
       console.warn("Paper delete failed. Falling back to full state sync.", error);
-      scheduleFullStateSync();
+      notifySaveFailed(error);
     }
   }
   render();
@@ -2340,7 +2227,7 @@ function renderLibraryEditForm(paper) {
     render();
     buildReport();
     requestAnimationFrame(() => {
-      const card = elements.paperList?.querySelector(`[data-paper-id="${paper.id}"]`);
+      const card = elements.paperList?.querySelector(`[data-paper-id="${CSS.escape(String(paper.id))}"]`);
       card?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
@@ -2350,7 +2237,7 @@ function renderLibraryEditForm(paper) {
     libraryEditDraftTags = [];
     renderPapers();
     requestAnimationFrame(() => {
-      const card = elements.paperList?.querySelector(`[data-paper-id="${paper.id}"]`);
+      const card = elements.paperList?.querySelector(`[data-paper-id="${CSS.escape(String(paper.id))}"]`);
       card?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
@@ -2424,7 +2311,7 @@ function render() {
     const paperId = pendingScrollPaperId;
     pendingScrollPaperId = "";
     requestAnimationFrame(() => {
-      const card = elements.paperList.querySelector(`[data-paper-id="${paperId}"]`);
+      const card = elements.paperList.querySelector(`[data-paper-id="${CSS.escape(String(paperId))}"]`);
       if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
     });
   }
@@ -2538,7 +2425,7 @@ function cancelManualEdit() {
   setPanelCollapsed("import", true);
   if (!returnPaperId) return;
   requestAnimationFrame(() => {
-    const card = elements.paperList.querySelector(`[data-paper-id="${returnPaperId}"]`);
+    const card = elements.paperList.querySelector(`[data-paper-id="${CSS.escape(String(returnPaperId))}"]`);
     if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
   });
 }
@@ -2857,7 +2744,7 @@ function renderTags() {
           .then((items) => {
             const matched = items.find((item) => item.name === tag);
             if (!matched) {
-              scheduleFullStateSync();
+              notifySaveFailed(new Error(`tag "${tag}" was not found`));
               return;
             }
             return apiResourceClient.updateTag(matched.id, nextName);
@@ -2866,8 +2753,7 @@ function renderTags() {
             .filter((paper) => paper.tags.includes(nextName))
             .map((paper) => persistPaperResource(paper, "update"))))
           .catch((error) => {
-            console.warn("Tag rename failed. Falling back to full state sync.", error);
-            scheduleFullStateSync();
+            notifySaveFailed(error);
           });
       }
       render();
@@ -2886,6 +2772,8 @@ function renderTags() {
       if (!confirmed) return;
       state.tags = state.tags.filter((item) => item !== tag);
       removeTagOrderName("ra-tag-order", tag);
+      // Only papers that carried the tag need saving (this used to re-save every paper).
+      const affectedIds = new Set(state.papers.filter((paper) => paper.tags.includes(tag)).map((paper) => paper.id));
       state.papers = state.papers.map((paper) => ({
         ...paper,
         tags: paper.tags.filter((item) => item !== tag)
@@ -2895,14 +2783,13 @@ function renderTags() {
           .then((items) => {
             const matched = items.find((item) => item.name === tag);
             const updates = state.papers
-              .filter((paper) => !paper.tags.includes(tag))
+              .filter((paper) => affectedIds.has(paper.id))
               .map((paper) => persistPaperResource(paper, "update"));
             if (!matched) return Promise.all(updates);
             return Promise.all([apiResourceClient.deleteTag(matched.id), ...updates]);
           })
           .catch((error) => {
-            console.warn("Tag delete failed. Falling back to full state sync.", error);
-            scheduleFullStateSync();
+            notifySaveFailed(error);
           });
       }
       render();
@@ -3014,8 +2901,8 @@ function renderDuplicateReview() {
       wrapper.innerHTML = `
         <div class="duplicate-item-head">
           <div>
-            <h4 class="duplicate-item-title">${item.incoming.title || existing.title}</h4>
-            <p class="muted">${item.reason}</p>
+            <h4 class="duplicate-item-title">${escapeHtml(item.incoming.title || existing.title)}</h4>
+            <p class="muted">${escapeHtml(item.reason)}</p>
           </div>
           <label>
             <span class="muted">Action</span>
@@ -3029,18 +2916,18 @@ function renderDuplicateReview() {
         <div class="duplicate-item-grid">
           <div class="duplicate-column">
             <strong>Existing</strong>
-            <p><b>Title:</b> ${existing.title || "Untitled"}</p>
-            <p><b>Authors:</b> ${existing.authors || "Unknown authors"}</p>
-            <p><b>Year / Journal:</b> ${getPublicationYear(existing.year) || "?"} / ${existing.journal || "?"}</p>
-            <p><b>DOI:</b> ${existing.doi || "-"}</p>
+            <p><b>Title:</b> ${escapeHtml(existing.title || "Untitled")}</p>
+            <p><b>Authors:</b> ${escapeHtml(existing.authors || "Unknown authors")}</p>
+            <p><b>Year / Journal:</b> ${escapeHtml(getPublicationYear(existing.year) || "?")} / ${escapeHtml(existing.journal || "?")}</p>
+            <p><b>DOI:</b> ${escapeHtml(existing.doi || "-")}</p>
             <p><b>Summary:</b> ${existing.summary ? "Present" : "Empty"}</p>
           </div>
           <div class="duplicate-column">
             <strong>Incoming</strong>
-            <p><b>Title:</b> ${item.incoming.title || "Untitled"}</p>
-            <p><b>Authors:</b> ${item.incoming.authors || "Unknown authors"}</p>
-            <p><b>Year / Journal:</b> ${getPublicationYear(item.incoming.year) || "?"} / ${item.incoming.journal || "?"}</p>
-            <p><b>DOI:</b> ${item.incoming.doi || "-"}</p>
+            <p><b>Title:</b> ${escapeHtml(item.incoming.title || "Untitled")}</p>
+            <p><b>Authors:</b> ${escapeHtml(item.incoming.authors || "Unknown authors")}</p>
+            <p><b>Year / Journal:</b> ${escapeHtml(getPublicationYear(item.incoming.year) || "?")} / ${escapeHtml(item.incoming.journal || "?")}</p>
+            <p><b>DOI:</b> ${escapeHtml(item.incoming.doi || "-")}</p>
             <p><b>Summary:</b> ${item.incoming.summary ? "Present" : "Empty"}</p>
           </div>
         </div>
@@ -3065,17 +2952,17 @@ function renderDuplicateReview() {
       wrapper.innerHTML = `
         <div class="duplicate-item-head">
           <div>
-            <h4 class="duplicate-item-title">${item.incoming.title || "Untitled"}</h4>
+            <h4 class="duplicate-item-title">${escapeHtml(item.incoming.title || "Untitled")}</h4>
             <p class="muted">This paper will be added as a new entry.</p>
           </div>
         </div>
         <div class="duplicate-item-grid">
           <div class="duplicate-column">
             <strong>Incoming</strong>
-            <p><b>Title:</b> ${item.incoming.title || "Untitled"}</p>
-            <p><b>Authors:</b> ${item.incoming.authors || "Unknown authors"}</p>
-            <p><b>Year / Journal:</b> ${getPublicationYear(item.incoming.year) || "?"} / ${item.incoming.journal || "?"}</p>
-            <p><b>DOI:</b> ${item.incoming.doi || "-"}</p>
+            <p><b>Title:</b> ${escapeHtml(item.incoming.title || "Untitled")}</p>
+            <p><b>Authors:</b> ${escapeHtml(item.incoming.authors || "Unknown authors")}</p>
+            <p><b>Year / Journal:</b> ${escapeHtml(getPublicationYear(item.incoming.year) || "?")} / ${escapeHtml(item.incoming.journal || "?")}</p>
+            <p><b>DOI:</b> ${escapeHtml(item.incoming.doi || "-")}</p>
             <p><b>Summary:</b> ${item.incoming.summary ? "Present" : "Empty"}</p>
           </div>
         </div>
@@ -3140,7 +3027,7 @@ async function finalizeImportReview() {
   elements.pdfImportStatus.textContent = message;
   render();
   buildReport();
-  scheduleFullStateSync();
+  notifySaveFailed(new Error("this import ran in the browser only and was not stored"));
   window.alert(message);
 }
 
@@ -3175,7 +3062,7 @@ function queueImportReview(incomingPapers, sourceLabel) {
     elements.pdfImportStatus.textContent = message;
     render();
     buildReport();
-    scheduleFullStateSync();
+    notifySaveFailed(new Error("this import ran in the browser only and was not stored"));
     if (sourceLabel !== "PDF import") window.alert(message);
     return;
   }
@@ -3391,7 +3278,7 @@ function renderPapers() {
     fragment.querySelector(".paper-summary").innerHTML = highlightSearchMatches(renderInlineMarkup(paper.summary || "No summary yet."), searchQuery);
     const citationRow = fragment.querySelector(".paper-citation-row");
     const citationText = buildCitationText(paper);
-    const paperUrl = (paper.url && String(paper.url).trim()) || (paper.doi ? `https://doi.org/${paper.doi}` : "");
+    const paperUrl = safeHref(paper.url) || (paper.doi ? `https://doi.org/${paper.doi}` : "");
     const hasDoi = !!(paper.doi && String(paper.doi).trim());
     const citationCopyButton = fragment.querySelector('button[data-copy-kind="citation"]');
     const doiCopyButton = fragment.querySelector('button[data-copy-kind="doi"]');
@@ -3608,7 +3495,7 @@ function renderPapers() {
       renderPapers();
       if (willOpen) {
         requestAnimationFrame(() => {
-          const newCard = elements.paperList?.querySelector(`[data-paper-id="${paperId}"]`);
+          const newCard = elements.paperList?.querySelector(`[data-paper-id="${CSS.escape(String(paperId))}"]`);
           const editForm = newCard?.querySelector(".library-edit-form-inline");
           (editForm || newCard)?.scrollIntoView({ behavior: "smooth", block: "center" });
         });
@@ -3692,22 +3579,31 @@ function renderPapers() {
     const noteSaveBtn = fragment.querySelector(".paper-note-save");
     updateNoteCharCount(note, noteCountEl, noteSaveBtn);
 
-    function renderNoteWithLinks(text) {
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      const parts = text.split(urlRegex);
-      return parts.map((part, i) => {
-        if (i % 2 === 1) {
-          const href = escapeHtml(part);
-          return `<a href="${href}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${href}</a>`;
+    // Built as DOM nodes so note text never reaches an HTML parser.
+    function renderNoteWithLinks(target, text) {
+      target.replaceChildren();
+      text.split(/(https?:\/\/[^\s]+)/g).forEach((part, i) => {
+        if (i % 2 === 1 && safeHref(part)) {
+          const a = document.createElement("a");
+          a.href = part;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.textContent = part;
+          a.addEventListener("click", (event) => event.stopPropagation());
+          target.append(a);
+          return;
         }
-        return escapeHtml(part).replace(/\n/g, "<br>");
-      }).join("");
+        part.split("\n").forEach((line, j) => {
+          if (j) target.append(document.createElement("br"));
+          if (line) target.append(document.createTextNode(line));
+        });
+      });
     }
 
     function showNoteView() {
       activeNoteEdit = null;
       if (note.value.trim()) {
-        noteView.innerHTML = renderNoteWithLinks(note.value.trim());
+        renderNoteWithLinks(noteView, note.value.trim());
         noteView.hidden = false;
         noteBlock.hidden = true;
       } else {
@@ -4920,8 +4816,8 @@ function renderPaperLinks(fragment, paper, getLivePaper) {
         : (other.url ? "Open external link in new tab" : "");
       chip.addEventListener("click", (e) => {
         if (e.target.closest("button")) return;
-        if (!other.doi && other.url) {
-          window.open(other.url, "_blank", "noopener");
+        if (!other.doi && safeHref(other.url)) {
+          window.open(safeHref(other.url), "_blank", "noopener");
           return;
         }
         if (typeof window.__appNavigateToPaper === "function") {
@@ -5548,7 +5444,7 @@ elements.tagForm.addEventListener("submit", async (event) => {
       await refreshTagsFromBackend();
     } catch (error) {
       console.warn("Tag create failed. Falling back to full state sync.", error);
-      scheduleFullStateSync();
+      notifySaveFailed(error);
     }
   }
   render();
@@ -5688,7 +5584,7 @@ elements.bulkDeleteButton.addEventListener("click", async () => {
       showAppToast(`${ids.size} paper${ids.size > 1 ? "s" : ""} moved to Bin`);
     } catch (error) {
       console.warn("Bulk delete failed. Falling back to full state sync.", error);
-      scheduleFullStateSync();
+      notifySaveFailed(error);
     }
   }
   render();
@@ -5870,20 +5766,9 @@ elements.duplicateImportCancelButton.addEventListener("click", () => {
   renderDuplicateReview();
 });
 
+// "Reset demo data" replaced the whole library. There is no such operation here.
 elements.seedButton.addEventListener("click", () => {
-  const confirmed = window.confirm(
-    "Reset demo data and discard your current local changes?\n\nThis will replace your current papers, tags, and profile saved in this browser."
-  );
-  if (!confirmed) return;
-  const password = window.prompt("Type 1115 to confirm reset.");
-  if (password !== "1115") {
-    window.alert("Reset cancelled. Password did not match.");
-    return;
-  }
-  state = normalizeState(structuredClone(seedState));
-  scheduleFullStateSync();
-  render();
-  buildReport();
+  showAppToast("Reset is not available on this site.");
 });
 
 function exportJson() {
@@ -6096,7 +5981,8 @@ async function initializeApp() {
     await refreshAuthSession();
   } catch (error) {
     console.warn("Auth session check failed.", error);
-    authSession = { enabled: false, authenticated: false, isAdmin: false, user: null, authUrl: "" };
+    // A failed check is a visitor, never an unscoped owner.
+    authSession = { enabled: true, authenticated: false, isAdmin: false, user: null, authUrl: "" };
     syncAuthUi();
     setAuthStatus("");
   }
@@ -6136,8 +6022,10 @@ async function initializeApp() {
   try {
     state = await loadState();
   } catch (error) {
-    switchToLocalMode(error, "Initial state load failed. Falling back to local state.");
-    state = localStorageAdapter.load();
+    // No local fallback: an empty view with a message, never a silent copy in localStorage.
+    console.warn("Initial state load failed.", error);
+    state = getDefaultStateForCurrentSession();
+    showAppToast(`Could not load your library: ${error.message || error}`, 6000);
   }
 
   render();

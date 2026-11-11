@@ -11,8 +11,8 @@
  *   POST /api/citations/refresh   { scope, limit }
  */
 
-import { apiJson, postJson } from "../api.js?v=1.0.0";
-import { navigateToPaper } from "../router.js?v=1.0.0";
+import { apiJson, postJson } from "../api.js?v=1.0.1";
+import { navigateToPaper } from "../router.js?v=1.0.1";
 
 let scope = "all";
 // Non-empty when viewing another user's map at /<slug>/maps — switches data
@@ -110,8 +110,10 @@ function setDetailSide(side) {
 }
 
 function escapeHtml(s) {
-  return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return window.RAEscape.escapeHtml(s ?? "");
 }
+
+const safeHref = (url) => window.RAEscape.safeHref(url);
 
 function isMainAuthor(node) {
   if (!node.isMine) return false;
@@ -1793,7 +1795,7 @@ function drawGraph(svgEl) {
       // Web nodes (DOI-less library entries reached via manual link) point
       // to an external resource — open it in a new tab. Library/profile
       // nodes still get the in-app detail panel.
-      if (d.url) window.open(d.url, "_blank", "noopener");
+      if (safeHref(d.url)) window.open(safeHref(d.url), "_blank", "noopener");
       applyHighlightFor(d.id);
       return;
     }

@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { build } from "../build-site.mjs";
 import { createServer } from "../dev-server.mjs";
 
-const ROUTES = ["news", "library", "maps", "profile", "dukhyun", "dukhyun/news", "dukhyun/library", "dukhyun/maps"];
+const ROUTES = ["news", "library", "maps", "bin", "profile", "dukhyun", "dukhyun/news", "dukhyun/library", "dukhyun/maps"];
 const ROUTE_FILES = ["404.html", ...ROUTES.flatMap((r) => [`${r}.html`, `${r}/index.html`])];
 const DATA = ["profile", "news", "library", "graph-all", "graph-mine", "graph-library"].map((n) => `data/public/${n}.json`);
 
@@ -193,7 +193,7 @@ describe("build", () => {
 
     const failed = run();
     assert.equal(failed.status, 1);
-    assert.match(failed.stdout, /^build-site: \d+ files, \d+ bytes, 17 route copies -> _site\r?\n$/);
+    assert.match(failed.stdout, /^build-site: \d+ files, \d+ bytes, 19 route copies -> _site\r?\n$/);
     assert.match(failed.stderr, /FAILED, 7 problem\(s\)/);
     for (const p of DATA) assert.ok(failed.stderr.includes(` - ${p} missing`), p);
     assert.ok(failed.stderr.includes(" - forbidden file in output: css/todo.md"));
@@ -201,7 +201,7 @@ describe("build", () => {
     rmSync(join(root, "css", "todo.md"));
     const ok = run("--allow-missing-data", "--out", join(root, "dist"));
     assert.equal(ok.status, 0, ok.stderr);
-    assert.match(ok.stdout, /17 route copies -> dist/);
+    assert.match(ok.stdout, /19 route copies -> dist/);
     assert.equal(ok.stderr.match(/^warning: /gm).length, 6);
     assert.equal(read(root, "dist/dukhyun/maps/index.html"), INDEX);
 
@@ -278,7 +278,7 @@ describe("dev-server", () => {
   });
 
   test("unknown paths get 404.html with status 404", async () => {
-    for (const path of ["/nope", "/bin", "/dukhyun/nope", "/a/b/c.js", "/css/", "/empty/", "/index.html/", "/CSS/base.css", "/News"]) {
+    for (const path of ["/nope", "/trash", "/dukhyun/nope", "/a/b/c.js", "/css/", "/empty/", "/index.html/", "/CSS/base.css", "/News"]) {
       const r = await request(path);
       assert.equal(r.status, 404, path);
       assert.equal(r.body, INDEX, path);

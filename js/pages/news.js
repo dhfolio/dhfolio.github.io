@@ -16,9 +16,9 @@
  * it is rendered and round-tripped on save but no longer editable in the form.
  */
 
-import { apiJson, postJson, putJson, deleteRequest } from "../api.js?v=1.0.0";
-import { canonicalizeNewsUrl, navigate, profilePath } from "../router.js?v=1.0.0";
-import { renderToolbar, renderBodyText, wireRichText } from "../components/richtext.js?v=1.0.0";
+import { apiJson, postJson, putJson, deleteRequest } from "../api.js?v=1.0.1";
+import { canonicalizeNewsUrl, navigate, profilePath } from "../router.js?v=1.0.1";
+import { renderToolbar, renderBodyText, wireRichText } from "../components/richtext.js?v=1.0.1";
 
 
 const container = () => document.querySelector("[data-page='news']");
@@ -45,14 +45,15 @@ let dragImageIndex = -1; // photo being dragged in the editor, or -1
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function escapeHtml(t) {
-  return String(t == null ? "" : t)
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return window.RAEscape.escapeHtml(t == null ? "" : t);
 }
 
 function isSafeUrl(url) {
   const u = String(url || "").trim().toLowerCase();
   return u.startsWith("http://") || u.startsWith("https://") || u.startsWith("mailto:");
 }
+
+const safeHref = (url) => window.RAEscape.safeHref(url);
 
 function newsId() {
   return `news_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -277,7 +278,7 @@ function renderImageEditor() {
 
 function renderForm() {
   return `
-    <form class="news-form" data-act="form" onsubmit="return false">
+    <form class="news-form" data-act="form">
       <div class="news-form-row">
         <div class="news-form-field news-date-field">
           <label class="news-form-label" for="news-date">Date</label>
@@ -424,6 +425,8 @@ function ensureDelegation(el) {
   if (el.dataset.newsWired === "1") return;
   el.dataset.newsWired = "1";
   el.addEventListener("click", onClick);
+  // Enter in a field must not submit (and reload) the editor form.
+  el.addEventListener("submit", (e) => e.preventDefault());
   el.addEventListener("input", onInput);
   el.addEventListener("change", onChange);
   el.addEventListener("dragstart", onDragStart);

@@ -29,7 +29,7 @@
     const pathname = String(path).split("?")[0];
     if (method === "GET" && BOOT[pathname]) return json(200, BOOT[pathname]);
     try {
-      if (!routerPromise) routerPromise = import("/js/localapi/index.js?v=1.0.0");
+      if (!routerPromise) routerPromise = import("/js/localapi/index.js?v=1.0.1");
       const { handle } = await routerPromise;
       const result = await handle({
         method,

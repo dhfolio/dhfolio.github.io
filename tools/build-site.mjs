@@ -6,7 +6,9 @@ import { parseArgs } from "node:util";
 
 export const DEPLOY_FILES = ["index.html", "app.js", "config.js", "journal-abbreviations.js", "favicon.svg", "favicon-app.svg", "manifest.webmanifest"];
 export const DEPLOY_DIRS = ["css", "js", "fonts", "vendor", "media", "data/public"];
-export const ROUTES = ["news", "library", "maps", "profile", "dukhyun", "dukhyun/news", "dukhyun/library", "dukhyun/maps"];
+// "bin" is owner-only, but an owner reloading /bin should get a 200 like any page;
+// the router sends visitors on to the profile.
+export const ROUTES = ["news", "library", "maps", "bin", "profile", "dukhyun", "dukhyun/news", "dukhyun/library", "dukhyun/maps"];
 export const DATA_FILES = ["profile", "news", "library", "graph-all", "graph-mine", "graph-library"].map((n) => `data/public/${n}.json`);
 const BANNED_EXT = [".bat", ".py", ".md", ".log", ".csv", ".db", ".bak", ".tmp-sync"];
 

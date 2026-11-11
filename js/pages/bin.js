@@ -12,7 +12,7 @@
  *   - Search within Bin
  */
 
-import { apiJson, postJson, deleteRequest } from "../api.js?v=1.0.0";
+import { apiJson, postJson, deleteRequest } from "../api.js?v=1.0.1";
 
 // ── State ───────────────────────────────────────────────────────────────────
 let papers = [];
@@ -79,8 +79,10 @@ function originLabel(p) {
 }
 
 function escapeHtml(t) {
-  return String(t || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return window.RAEscape.escapeHtml(t || "");
 }
+
+const safeHref = (url) => window.RAEscape.safeHref(url);
 
 function highlightPlainText(text, query) {
   const safe = escapeHtml(text);
@@ -233,18 +235,21 @@ function openDetailModal(p) {
     `<span class="bin-card-tag-chip">${escapeHtml(c)}</span>`
   ).join("");
 
+  // Every value is HTML: plain fields are escaped here, links are built escaped.
+  const text = (v) => (v ? escapeHtml(v) : "");
+  const url = safeHref(p.url);
   const rows = [
-    ["Authors",    p.authors],
-    ["Affiliations", p.affiliations],
-    ["Journal",    p.journal],
-    ["Year",       p.year],
+    ["Authors",    text(p.authors)],
+    ["Affiliations", text(p.affiliations)],
+    ["Journal",    text(p.journal)],
+    ["Year",       text(p.year)],
     ["DOI",        p.doi ? `<a href="https://doi.org/${escapeHtml(p.doi)}" target="_blank" rel="noopener">${escapeHtml(p.doi)}</a>` : ""],
-    ["URL",        p.url  ? `<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener">${escapeHtml(p.url)}</a>` : ""],
-    ["Type",       p.type],
-    ["Status",     p.status],
-    ["Note",       p.notes],
-    ["Summary",    p.summary],
-    ["Deleted",    p.deletedAt ? formatDate(p.deletedAt) : ""],
+    ["URL",        url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(url)}</a>` : text(p.url)],
+    ["Type",       text(p.type)],
+    ["Status",     text(p.status)],
+    ["Note",       text(p.notes)],
+    ["Summary",    p.summary ? (window.__appRenderInlineMarkup ? window.__appRenderInlineMarkup(p.summary) : escapeHtml(p.summary)) : ""],
+    ["Deleted",    p.deletedAt ? text(formatDate(p.deletedAt)) : ""],
   ].filter(([, v]) => v).map(([label, value]) =>
     `<div class="bin-detail-row"><span class="bin-detail-label">${label}</span><span class="bin-detail-value">${value}</span></div>`
   ).join("");

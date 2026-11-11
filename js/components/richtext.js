@@ -19,8 +19,7 @@
 
 
 function escapeHtml(t) {
-  return String(t == null ? "" : t)
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return window.RAEscape.escapeHtml(t == null ? "" : t);
 }
 
 // ── Rendering ───────────────────────────────────────────────────────────────
