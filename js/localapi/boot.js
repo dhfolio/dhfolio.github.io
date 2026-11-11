@@ -89,6 +89,9 @@
         fetch: window.fetch.bind(window),
         owner: o
       });
+      if (typeof result.raw === "string") {
+        return new Response(result.raw, { status: result.status, headers: { "Content-Type": result.contentType || "text/plain; charset=utf-8" } });
+      }
       return json(result.status, result.body);
     } catch (err) {
       routerPromise = null;

@@ -19,7 +19,7 @@
  *   /<slug>/news   – Public/owner news at that slug
  */
 
-import { isValidSlug as isUsernameValid, isReserved } from "./utils/reserved-usernames.js?v=1.0.4";
+import { isValidSlug as isUsernameValid, isReserved } from "./utils/reserved-usernames.js?v=1.0.5";
 
 const PAGES = ["library", "bin", "profile", "news", "maps"];
 // Pages that also exist under a slug, as /<slug>/<page>.

@@ -5,8 +5,8 @@
  * and asks the committer to save soon.
  */
 
-import { applyFile, recordPath, toJson } from "../shared/dataset.js?v=1.0.4";
-import { MEDIA_PATH, mediaPathFor, parseImageDataUrl } from "../shared/media.js?v=1.0.4";
+import { applyFile, recordPath, toJson } from "../shared/dataset.js?v=1.0.5";
+import { MEDIA_PATH, mediaPathFor, parseImageDataUrl } from "../shared/media.js?v=1.0.5";
 
 export function createEditor({ dataset, journal, committer, readOnly = "", hasMedia = () => false }) {
   const store = { dataset };

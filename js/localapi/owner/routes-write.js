@@ -5,9 +5,9 @@
  * ctx.editor (owner/editor.js) is the only thing that changes data.
  */
 
-import { manualLinksFor } from "./routes-read.js?v=1.0.4";
-import { fetchReferences } from "./references.js?v=1.0.4";
-import { HttpError, normalizePaper, parseBody, sortCasefold, tagName, utcNow } from "../shared/payload.js?v=1.0.4";
+import { manualLinksFor } from "./routes-read.js?v=1.0.5";
+import { fetchReferences } from "./references.js?v=1.0.5";
+import { HttpError, normalizePaper, parseBody, sortCasefold, tagName, utcNow } from "../shared/payload.js?v=1.0.5";
 
 const ok = (body) => ({ status: 200, body });
 const noContent = () => ({ status: 204, body: null });

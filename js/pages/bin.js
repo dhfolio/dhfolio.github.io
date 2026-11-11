@@ -12,7 +12,7 @@
  *   - Search within Bin
  */
 
-import { apiJson, postJson, deleteRequest } from "../api.js?v=1.0.4";
+import { apiJson, postJson, deleteRequest } from "../api.js?v=1.0.5";
 
 // ── State ───────────────────────────────────────────────────────────────────
 let papers = [];

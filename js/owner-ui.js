@@ -115,8 +115,10 @@
   let save = null; // last committer status (owner/committer.js)
 
   const actions = () => window.__raOwnerActions || {};
+  let publish = null; // {state: publishing|published|failed|unknown, url}
+  const PUBLISH_TEXT = { publishing: " · publishing…", published: " · published", failed: " · publish failed" };
   const SAVE_TEXT = {
-    saved: () => "Owner · saved",
+    saved: () => `Owner · saved${(publish && PUBLISH_TEXT[publish.state]) || ""}`,
     pending: (s) => `Owner · ${s.pending} unsaved · save now`,
     saving: () => "Owner · saving…",
     offline: (s) => `Owner · offline · ${s.pending} waiting`,
@@ -146,7 +148,8 @@
     if (!pill) return;
     pill.hidden = s === "none";
     const loading = progress && progress.done < progress.total;
-    const bad = s === "error" || ["error", "auth", "perm", "conflict", "confirm-delete"].includes(save?.state);
+    const bad = s === "error" || ["error", "auth", "perm", "conflict", "confirm-delete"].includes(save?.state)
+      || (save?.state === "saved" && publish?.state === "failed");
     pill.classList.toggle("is-error", bad);
     if (s === "pending") pill.textContent = progress ? `Owner · loading ${progress.done}/${progress.total}` : "Owner · checking…";
     else if (s === "error") pill.textContent = "Owner · token problem";
@@ -173,7 +176,11 @@
     const s = state();
     const st = save?.state;
     if (s === "error" || st === "auth" || st === "perm") return openDialog(s === "error" ? window.__raOwner.error?.message : save.message);
-    if (st === "pending" || st === "error" || st === "offline") actions().flush?.();
+    if (st === "pending" || st === "error" || st === "offline") return actions().flush?.();
+    // A failed publish: the run's log on GitHub says why.
+    if (st === "saved" && publish?.state === "failed" && /^https:\/\/github\.com\//.test(publish.url || "")) {
+      window.open(publish.url, "_blank", "noopener");
+    }
   }
 
   function mount() {
@@ -197,7 +204,12 @@
   let lastProgress = null;
   window.addEventListener("atlas-owner-state", () => render(lastProgress));
   window.addEventListener("atlas-owner-progress", (e) => { lastProgress = e.detail; render(lastProgress); });
-  window.addEventListener("atlas-owner-status", (e) => { save = e.detail; render(lastProgress); });
+  window.addEventListener("atlas-owner-status", (e) => {
+    if (e.detail?.state !== "saved") publish = null;
+    save = e.detail;
+    render(lastProgress);
+  });
+  window.addEventListener("atlas-owner-publish", (e) => { publish = e.detail; render(lastProgress); });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();
 })();

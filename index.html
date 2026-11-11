@@ -7,7 +7,7 @@
        a stored-XSS payload in paper metadata cannot run or reach the owner token.
        connect-src lists every API the owner editor calls from the browser. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; manifest-src 'self'; connect-src 'self' https://api.github.com https://api.crossref.org https://api.openalex.org https://api.semanticscholar.org https://api.datacite.org https://doi.org https://data.crossref.org https://researchatlas.io; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'; worker-src 'none'">
-  <script src="./js/frame-guard.js?v=1.0.4"></script>
+  <script src="./js/frame-guard.js?v=1.0.5"></script>
   <!-- Routes are up to two segments deep (/<slug>/news), so the relative
        "./css/…" asset URLs below must resolve against the site root, not
        against /<slug>/. -->
@@ -19,27 +19,27 @@
   <meta property="og:title" content="Duk-Hyun Choe">
   <meta property="og:description" content="Publications, talks, news, reading library and citation map.">
   <meta property="og:url" content="https://dhfolio.github.io/">
-  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=1.0.4">
-  <link rel="apple-touch-icon" href="./favicon-app.svg?v=1.0.4">
-  <link rel="manifest" href="./manifest.webmanifest?v=1.0.4">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg?v=1.0.5">
+  <link rel="apple-touch-icon" href="./favicon-app.svg?v=1.0.5">
+  <link rel="manifest" href="./manifest.webmanifest?v=1.0.5">
   <meta name="theme-color" content="#1c1d20">
-  <link rel="stylesheet" href="./css/fonts.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/base.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/layout.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/layout-chrome.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/auth.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/components.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/richtext.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/admin.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/navigation.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/pages/library.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/pages/public-library.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/pages/bin.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/pages/profile.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/pages/achievements.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/pages/news.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/pages/maps.css?v=1.0.4">
-  <link rel="stylesheet" href="./css/site.css?v=1.0.4">
+  <link rel="stylesheet" href="./css/fonts.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/base.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/layout.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/layout-chrome.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/auth.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/components.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/richtext.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/admin.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/navigation.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/pages/library.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/pages/public-library.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/pages/bin.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/pages/profile.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/pages/achievements.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/pages/news.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/pages/maps.css?v=1.0.5">
+  <link rel="stylesheet" href="./css/site.css?v=1.0.5">
 </head>
 <body>
   <div class="app-shell">
@@ -695,16 +695,16 @@
     </article>
   </template>
 
-  <script src="./journal-abbreviations.js?v=1.0.4"></script>
-  <script src="./config.js?v=1.0.4"></script>
-  <script src="./js/utils/escape.js?v=1.0.4"></script>
-  <script src="./js/localapi/boot.js?v=1.0.4"></script>
-  <script src="./js/utils/author-badges.js?v=1.0.4"></script>
-  <script src="./js/utils/achievement-defs.js?v=1.0.4"></script>
-  <script src="./js/utils/achievement-engine.js?v=1.0.4"></script>
-  <script src="./app.js?v=1.0.4"></script>
-  <script src="./vendor/d3.min.js?v=1.0.4" defer></script>
-  <script src="./js/owner-ui.js?v=1.0.4" defer></script>
-  <script type="module" src="./js/main.js?v=1.0.4"></script>
+  <script src="./journal-abbreviations.js?v=1.0.5"></script>
+  <script src="./config.js?v=1.0.5"></script>
+  <script src="./js/utils/escape.js?v=1.0.5"></script>
+  <script src="./js/localapi/boot.js?v=1.0.5"></script>
+  <script src="./js/utils/author-badges.js?v=1.0.5"></script>
+  <script src="./js/utils/achievement-defs.js?v=1.0.5"></script>
+  <script src="./js/utils/achievement-engine.js?v=1.0.5"></script>
+  <script src="./app.js?v=1.0.5"></script>
+  <script src="./vendor/d3.min.js?v=1.0.5" defer></script>
+  <script src="./js/owner-ui.js?v=1.0.5" defer></script>
+  <script type="module" src="./js/main.js?v=1.0.5"></script>
 </body>
 </html>

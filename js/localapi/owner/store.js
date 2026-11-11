@@ -10,8 +10,8 @@
  * DOM-free: `gh` (github.js), `cache` ({get,set}) and `onProgress` are injected.
  */
 
-import { applyFile, datasetFromFiles, isDatasetPath } from "../shared/dataset.js?v=1.0.4";
-import { bytesToBase64 } from "./github.js?v=1.0.4";
+import { applyFile, datasetFromFiles, isDatasetPath } from "../shared/dataset.js?v=1.0.5";
+import { bytesToBase64 } from "./github.js?v=1.0.5";
 
 const BATCH = 100;
 const REST_CONCURRENCY = 6;

@@ -9,15 +9,15 @@
  * }
  */
 
-import { byDesc, project, yearOnly } from "../shared/projection.js?v=1.0.4";
-import { lookupMetadata } from "./metadata.js?v=1.0.4";
+import { byDesc, project, yearOnly } from "../shared/projection.js?v=1.0.5";
+import { lookupMetadata } from "./metadata.js?v=1.0.5";
 
 // While the old site runs, its lookup still has what the browser cannot get:
 // abstracts scraped from publisher pages (doi.org → publisher has no CORS).
 const LEGACY_METADATA = "https://researchatlas.io/api/metadata?query=";
 
 /** GET /api/metadata: the browser port, plus the old site's abstract when the port found none. */
-async function metadataFor(query, fetch) {
+export async function metadataFor(query, fetch) {
   const result = await lookupMetadata(query, { fetch });
   if (!result.abstract && result.doi) {
     try {

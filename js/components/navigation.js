@@ -16,7 +16,7 @@
  *   - Delegates to window.__appQuickAddFromNav(query)
  */
 
-import { navigate, getCurrentPageName, getStickySlug } from "../router.js?v=1.0.4";
+import { navigate, getCurrentPageName, getStickySlug } from "../router.js?v=1.0.5";
 
 // ── DOM references ──────────────────────────────────────────────────────────
 const mobileNav      = () => document.getElementById("mobile-nav");

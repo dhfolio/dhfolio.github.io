@@ -10,10 +10,12 @@
  * (owner/session.js): owner GETs are answered from the private dataset.
  */
 
-import { publicRoutes } from "./routes-public.js?v=1.0.4";
-import { ownerRead } from "./owner/routes-read.js?v=1.0.4";
-import { ownerWrite } from "./owner/routes-write.js?v=1.0.4";
-import { ownerWriteProfile } from "./owner/routes-profile.js?v=1.0.4";
+import { publicRoutes } from "./routes-public.js?v=1.0.5";
+import { ownerRead } from "./owner/routes-read.js?v=1.0.5";
+import { ownerWrite } from "./owner/routes-write.js?v=1.0.5";
+import { ownerWriteProfile } from "./owner/routes-profile.js?v=1.0.5";
+import { ownerCitations } from "./owner/routes-citations.js?v=1.0.5";
+import { ownerExportCsv } from "./owner/export-csv.js?v=1.0.5";
 
 const routes = [...publicRoutes];
 
@@ -25,7 +27,8 @@ export async function handle({ method, path, body, ownerSlug, fetch, owner }) {
     const url = new URL(path, "http://local");
     const ctx = { method, pathname: url.pathname, query: url.searchParams, body, ownerSlug, fetch, owner, editor: owner?.editor };
     if (owner) {
-      const result = (await ownerRead(ctx)) || (await ownerWrite(ctx)) || (await ownerWriteProfile(ctx));
+      const result = (await ownerExportCsv(ctx)) || (await ownerRead(ctx)) || (await ownerWrite(ctx))
+        || (await ownerWriteProfile(ctx)) || (await ownerCitations(ctx));
       if (result) return result;
       if (method === "PUT" && url.pathname === "/api/state") {
         // The original replaced every record (state_repository.py:27-91); never here.

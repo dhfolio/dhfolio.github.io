@@ -6,13 +6,13 @@
  * Photos become media/ files via editor.putMedia (shared/media.js).
  */
 
-import { ownerRead } from "./routes-read.js?v=1.0.4";
-import { ensureProfileTags, ensureTags } from "./routes-write.js?v=1.0.4";
-import { MediaError } from "../shared/media.js?v=1.0.4";
+import { ownerRead } from "./routes-read.js?v=1.0.5";
+import { ensureProfileTags, ensureTags } from "./routes-write.js?v=1.0.5";
+import { MediaError } from "../shared/media.js?v=1.0.5";
 import {
   HttpError, NEWS, checkLink, checkNewsImages, cleanNewsLinks, cleanOrder, cleanPubViewPrefs,
   normalizeRecognition, normalizeTalk, parseBody, utcNow,
-} from "../shared/payload.js?v=1.0.4";
+} from "../shared/payload.js?v=1.0.5";
 
 const ok = (body) => ({ status: 200, body });
 const noContent = () => ({ status: 204, body: null });

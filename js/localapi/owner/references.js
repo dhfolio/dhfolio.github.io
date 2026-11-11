@@ -11,7 +11,7 @@
  * enrichReference(doi) for rows that have a DOI but no title.
  */
 
-import { fetchCrossref, fetchJson, fetchOpenalexByUrl, get, isArxivDoi, or, pyQuote, truthy } from "./metadata.js?v=1.0.4";
+import { fetchCrossref, fetchJson, fetchOpenalexByUrl, get, isArxivDoi, or, pyQuote, truthy } from "./metadata.js?v=1.0.5";
 
 // No mailto: OpenAlex does not require it, and an address in a public page would be published.
 const OPENALEX_CAP = 80;
