@@ -9,13 +9,13 @@
  * Phase 1+: New page modules (bin, profile, news, maps) imported here.
  */
 
-import { initRouter, registerPage, navigateToPaper } from "./router.js?v=1.0.1";
-import { initNavigation } from "./components/navigation.js?v=1.0.1";
-import { activate as activateBin } from "./pages/bin.js?v=1.0.1";
-import { activate as activateProfile } from "./pages/profile.js?v=1.0.1";
-import { activate as activateNews } from "./pages/news.js?v=1.0.1";
-import { activate as activateMaps } from "./pages/maps.js?v=1.0.1";
-import { activate as activatePublicLibrary, deactivate as deactivatePublicLibrary } from "./pages/public-library.js?v=1.0.1";
+import { initRouter, registerPage, navigateToPaper } from "./router.js?v=1.0.2";
+import { initNavigation } from "./components/navigation.js?v=1.0.2";
+import { activate as activateBin } from "./pages/bin.js?v=1.0.2";
+import { activate as activateProfile } from "./pages/profile.js?v=1.0.2";
+import { activate as activateNews } from "./pages/news.js?v=1.0.2";
+import { activate as activateMaps } from "./pages/maps.js?v=1.0.2";
+import { activate as activatePublicLibrary, deactivate as deactivatePublicLibrary } from "./pages/public-library.js?v=1.0.2";
 
 // ── Library page module ───────────────────────────────────────────────────────
 // The owner's Library is managed entirely by app.js; activate() re-triggers a

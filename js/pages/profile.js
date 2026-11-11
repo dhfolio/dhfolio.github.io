@@ -7,10 +7,10 @@
  * GET /api/profiles/:slug. See renderPublicProfile() at bottom of file.
  */
 
-import { apiJson, apiFetch, postJson, putJson, patchJson, deleteRequest } from "../api.js?v=1.0.1";
-import { isValidSlug as _isValidSlugClient, isReserved as _isReservedClient } from "../utils/reserved-usernames.js?v=1.0.1";
-import { canonicalizeProfileUrl, navigateToPaper, profilePath } from "../router.js?v=1.0.1";
-import { renderToolbar as renderRichTextToolbar, renderBodyText, wireRichText } from "../components/richtext.js?v=1.0.1";
+import { apiJson, apiFetch, postJson, putJson, patchJson, deleteRequest } from "../api.js?v=1.0.2";
+import { isValidSlug as _isValidSlugClient, isReserved as _isReservedClient } from "../utils/reserved-usernames.js?v=1.0.2";
+import { canonicalizeProfileUrl, navigateToPaper, profilePath } from "../router.js?v=1.0.2";
+import { renderToolbar as renderRichTextToolbar, renderBodyText, wireRichText } from "../components/richtext.js?v=1.0.2";
 
 
 // ── Social link icons (Simple Icons / monochrome inline SVGs) ──────────────

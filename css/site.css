@@ -55,3 +55,69 @@ body:not(.is-authenticated) .mobile-nav-inner {
 .footer-owner-link {
   color: inherit;
 }
+
+/* Owner token dialog (js/owner-ui.js). Colours come from the theme tokens. */
+.owner-dialog {
+  width: min(420px, calc(100vw - 32px));
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  padding: 20px;
+  background: var(--panel-strong);
+  color: var(--text);
+}
+.owner-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+.owner-dialog-title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+.owner-dialog-text {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.owner-dialog-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 16px; /* no zoom-on-focus on phones */
+}
+.owner-dialog-error {
+  min-height: 1.3em;
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+}
+.owner-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Status pill while the owner is unlocked; above the mobile bottom nav. */
+.owner-pill {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 60;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel-strong);
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: default;
+}
+.owner-pill.is-error {
+  cursor: pointer;
+  border-color: var(--danger-fg);
+  color: var(--danger-fg);
+}
+.owner-dialog-error:not(:empty) {
+  color: var(--danger-fg);
+}
+@media (max-width: 700px) {
+  .owner-pill {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+}

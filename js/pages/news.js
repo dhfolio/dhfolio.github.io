@@ -16,9 +16,9 @@
  * it is rendered and round-tripped on save but no longer editable in the form.
  */
 
-import { apiJson, postJson, putJson, deleteRequest } from "../api.js?v=1.0.1";
-import { canonicalizeNewsUrl, navigate, profilePath } from "../router.js?v=1.0.1";
-import { renderToolbar, renderBodyText, wireRichText } from "../components/richtext.js?v=1.0.1";
+import { apiJson, postJson, putJson, deleteRequest } from "../api.js?v=1.0.2";
+import { canonicalizeNewsUrl, navigate, profilePath } from "../router.js?v=1.0.2";
+import { renderToolbar, renderBodyText, wireRichText } from "../components/richtext.js?v=1.0.2";
 
 
 const container = () => document.querySelector("[data-page='news']");
