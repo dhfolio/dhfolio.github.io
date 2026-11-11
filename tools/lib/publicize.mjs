@@ -60,6 +60,13 @@ function scrub(v, path, media) {
   );
 }
 
+// Every field the pages put into an href/src. A published value must be empty,
+// http(s), mailto, or one of our own /media/ files: the data repository is
+// writable with the owner token, so it is not trusted to keep script URLs out.
+const LINK_KEY = /^(url|[a-z]+Url|talkLink|src|picture)$/;
+const LINK_OK = /^(https?:\/\/|mailto:)/i;
+const OWN_MEDIA = /^\/media\/[0-9a-f]{16}\.(jpg|png|webp|gif|svg)$/;
+
 export function assertPublic(v, path = '$') {
   if (typeof v === 'string') {
     if (DATA_IMG.test(v)) fail(path, 'string still contains an inline data:image/ URL');
@@ -72,6 +79,9 @@ export function assertPublic(v, path = '$') {
       const p = at(path, k);
       if (SENSITIVE.test(k)) fail(p, 'sensitive key must not be published');
       if (k === 'pdfPath' && x !== '' && !(typeof x === 'string' && HTTP.test(x))) fail(p, 'pdfPath is not an http(s) URL');
+      if (LINK_KEY.test(k) && typeof x === 'string' && x.trim() !== '' && !LINK_OK.test(x.trim()) && !OWN_MEDIA.test(x)) {
+        fail(p, `link is not http(s), mailto or /media/: ${JSON.stringify(x.slice(0, 40))}`);
+      }
       assertPublic(x, p);
     }
   }
