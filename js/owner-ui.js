@@ -93,7 +93,11 @@
   }
 
   function lock() {
-    if (!window.confirm("Lock editing on this device?\n\nThe GitHub token and the cached private data are removed from this browser. You will need the token to unlock again.")) return;
+    const pending = (window.__raOwnerActions && window.__raOwnerActions.pending()) || 0;
+    const warning = pending
+      ? `\n\n${pending} change(s) are not saved to GitHub yet and will be lost.`
+      : "";
+    if (!window.confirm(`Lock editing on this device?\n\nThe GitHub token and the cached private data are removed from this browser. You will need the token to unlock again.${warning}`)) return;
     try { localStorage.removeItem(TOKEN_KEY); } catch (err) { /* nothing stored */ }
     const done = () => location.reload();
     try {
@@ -104,19 +108,72 @@
     }
   }
 
-  // ── Footer link + status pill ─────────────────────────────────────────────
+  // ── Footer link, status pill, banner ──────────────────────────────────────
   let link = null;
   let pill = null;
+  let banner = null;
+  let save = null; // last committer status (owner/committer.js)
+
+  const actions = () => window.__raOwnerActions || {};
+  const SAVE_TEXT = {
+    saved: () => "Owner · saved",
+    pending: (s) => `Owner · ${s.pending} unsaved · save now`,
+    saving: () => "Owner · saving…",
+    offline: (s) => `Owner · offline · ${s.pending} waiting`,
+    ratelimit: () => "Owner · GitHub busy · retrying",
+    error: () => "Owner · save failed · retry",
+    auth: () => "Owner · token expired · tap",
+    perm: () => "Owner · token cannot write · tap",
+    conflict: () => "Owner · needs a choice",
+    "confirm-delete": () => "Owner · needs a choice",
+    readonly: () => "Owner · read-only (other tab)",
+  };
+
+  function showBanner(text, buttons) {
+    if (!banner) {
+      banner = h("div", { class: "owner-banner", role: "alert" });
+      document.body.append(banner);
+    }
+    banner.replaceChildren(h("p", { class: "owner-banner-text", text }),
+      h("div", { class: "owner-banner-actions" }, ...buttons.map(([label, fn, cls]) => h("button", { type: "button", class: cls || "secondary", text: label, onclick: fn }))));
+    banner.hidden = false;
+  }
+  const hideBanner = () => { if (banner) banner.hidden = true; };
 
   function render(progress) {
     const s = state();
     if (link) link.textContent = s === "unlocked" ? "Lock" : "Owner";
     if (!pill) return;
     pill.hidden = s === "none";
-    pill.classList.toggle("is-error", s === "error");
+    const loading = progress && progress.done < progress.total;
+    const bad = s === "error" || ["error", "auth", "perm", "conflict", "confirm-delete"].includes(save?.state);
+    pill.classList.toggle("is-error", bad);
     if (s === "pending") pill.textContent = progress ? `Owner · loading ${progress.done}/${progress.total}` : "Owner · checking…";
-    else if (s === "unlocked") pill.textContent = progress && progress.done < progress.total ? `Owner · loading ${progress.done}/${progress.total}` : "Owner · read-only";
     else if (s === "error") pill.textContent = "Owner · token problem";
+    else if (loading) pill.textContent = `Owner · loading ${progress.done}/${progress.total}`;
+    else pill.textContent = (SAVE_TEXT[save?.state] || SAVE_TEXT.saved)(save || {});
+
+    if (save?.state === "conflict") {
+      const files = (save.paths || []).map((p) => p.replace(/\.json$/, "")).join(", ");
+      showBanner(`Changed on another device too: ${files}. Keep the version on this device, or use the other one?`, [
+        ["Keep mine", () => actions().resolve?.("mine"), "primary"],
+        ["Use theirs", () => actions().resolve?.("theirs")],
+      ]);
+    } else if (save?.state === "confirm-delete") {
+      showBanner(`${save.message} Continue?`, [
+        ["Delete them", () => actions().confirmDelete?.(), "primary"],
+        ["Not now", hideBanner],
+      ]);
+    } else {
+      hideBanner();
+    }
+  }
+
+  function onPill() {
+    const s = state();
+    const st = save?.state;
+    if (s === "error" || st === "auth" || st === "perm") return openDialog(s === "error" ? window.__raOwner.error?.message : save.message);
+    if (st === "pending" || st === "error" || st === "offline") actions().flush?.();
   }
 
   function mount() {
@@ -132,9 +189,7 @@
     }
     pill = h("button", { type: "button", class: "owner-pill", "aria-live": "polite" });
     pill.hidden = true;
-    pill.addEventListener("click", () => {
-      if (state() === "error") openDialog(window.__raOwner.error?.message);
-    });
+    pill.addEventListener("click", onPill);
     document.body.append(pill);
     render();
   }
@@ -142,6 +197,7 @@
   let lastProgress = null;
   window.addEventListener("atlas-owner-state", () => render(lastProgress));
   window.addEventListener("atlas-owner-progress", (e) => { lastProgress = e.detail; render(lastProgress); });
+  window.addEventListener("atlas-owner-status", (e) => { save = e.detail; render(lastProgress); });
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount);
   else mount();
 })();

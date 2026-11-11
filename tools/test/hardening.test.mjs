@@ -67,6 +67,14 @@ test("no inline event handlers, inline styles or javascript: URLs in generated m
   }
 });
 
+test("no personal e-mail address in published sources (the repository and site are public)", () => {
+  for (const rel of [...SOURCES, "index.html"]) {
+    const src = read(rel);
+    const hits = [...src.matchAll(/[A-Za-z0-9._%+-]+@(?:gmail|naver|outlook|hotmail|yahoo|icloud|mit|samsung)\.[a-z.]+/gi)].map((m) => m[0]);
+    assert.deepEqual(hits, [], rel);
+  }
+});
+
 test("index.html: CSP is the first thing after the charset and allows no inline or eval script", () => {
   const html = read("index.html");
   const head = html.slice(html.indexOf("<head>"), html.indexOf("</head>"));

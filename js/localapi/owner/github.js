@@ -96,6 +96,21 @@ export function createGitHub({ token, repo, fetch, apiBase = "https://api.github
       if (t.truncated) throw new GitHubError("bad", 0, "repository tree is too large to list in one request");
       return new Map(t.tree.filter((e) => e.type === "blob").map((e) => [e.path, e.sha]));
     },
+    // ── writes (Git Data API; verified in experiment E1) ──
+    async createBlobBase64(content) {
+      return (await request("POST", "/git/blobs", { content, encoding: "base64" })).sha;
+    },
+    /** entries: [{path, mode, type:"blob", content} | {..., sha} | {..., sha: null}] */
+    async createTree(baseTree, entries) {
+      return (await request("POST", "/git/trees", { base_tree: baseTree, tree: entries })).sha;
+    },
+    async createCommit(message, tree, parents) {
+      return (await request("POST", "/git/commits", { message, tree, parents })).sha;
+    },
+    /** Fast-forward only; a stale parent is a GitHubError of kind "conflict". */
+    async updateRef(branch, sha) {
+      return request("PATCH", `/git/refs/heads/${branch}`, { sha, force: false });
+    },
     async getBlobBytes(sha) {
       const b = await request("GET", `/git/blobs/${sha}`);
       return base64ToBytes(b.content || "");

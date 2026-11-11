@@ -116,6 +116,37 @@ body:not(.is-authenticated) .mobile-nav-inner {
 .owner-dialog-error:not(:empty) {
   color: var(--danger-fg);
 }
+.owner-pill:not(.is-error) {
+  cursor: pointer;
+}
+
+/* Decision banner (conflict with another device, large deletion). */
+.owner-banner {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  width: min(560px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--danger-fg);
+  background: var(--panel-strong);
+  color: var(--text);
+  box-shadow: var(--shadow);
+}
+.owner-banner-text {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.owner-banner-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
 @media (max-width: 700px) {
   .owner-pill {
     bottom: calc(76px + env(safe-area-inset-bottom, 0px));

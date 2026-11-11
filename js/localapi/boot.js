@@ -17,10 +17,9 @@
   // Same ?v= as this script tag, so tools/bump_version.py covers the module imports below.
   const VERSION = (document.currentScript && new URL(document.currentScript.src).searchParams.get("v")) || "0";
 
-  const json = (status, body) => new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" }
-  });
+  const json = (status, body) => (status === 204 || status === 304
+    ? new Response(null, { status })
+    : new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } }));
 
   const VISITOR = { enabled: true, authenticated: false, isAdmin: false, user: null, authUrl: "" };
   const BOOT = {

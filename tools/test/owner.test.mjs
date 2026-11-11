@@ -112,12 +112,12 @@ test("owner GETs come from the private dataset", async () => {
   assert.deepEqual([other.status, other.body.detail], [404, "Profile not found."], "the pages' not-found view, as for visitors");
 });
 
-test("writes are refused (423) and unported GETs are 501 until editing is switched on", async () => {
+test("without an editor, writes are not available; a whole-state PUT never is", async () => {
   const owner = ownerFor(setup().gh);
-  for (const [m, p] of [["POST", "/api/papers"], ["PUT", "/api/papers/p1"], ["DELETE", "/api/bin"], ["PUT", "/api/state"]]) {
-    assert.equal((await call(owner, m, p)).status, 423, `${m} ${p}`);
+  for (const [m, p] of [["POST", "/api/papers"], ["PUT", "/api/papers/p1"], ["DELETE", "/api/bin"]]) {
+    assert.equal((await call(owner, m, p)).status, 501, `${m} ${p}`);
   }
-  assert.equal((await call(owner, "GET", "/api/metadata?query=10.1/x")).status, 501);
+  assert.equal((await call(owner, "PUT", "/api/state")).status, 405);
 });
 
 test("GitHub failures become statuses the pages handle, never exceptions", async () => {

@@ -9,7 +9,25 @@
  * }
  */
 
-import { byDesc, project, yearOnly } from "../shared/projection.js?v=1.0.2";
+import { byDesc, project, yearOnly } from "../shared/projection.js?v=1.0.3";
+import { lookupMetadata } from "./metadata.js?v=1.0.3";
+
+// While the old site runs, its lookup still has what the browser cannot get:
+// abstracts scraped from publisher pages (doi.org → publisher has no CORS).
+const LEGACY_METADATA = "https://researchatlas.io/api/metadata?query=";
+
+/** GET /api/metadata: the browser port, plus the old site's abstract when the port found none. */
+async function metadataFor(query, fetch) {
+  const result = await lookupMetadata(query, { fetch });
+  if (!result.abstract && result.doi) {
+    try {
+      const res = await fetch(LEGACY_METADATA + encodeURIComponent(result.doi), { credentials: "omit" });
+      const legacy = res.ok ? await res.json() : null;
+      if (legacy && typeof legacy.abstract === "string" && legacy.abstract) result.abstract = legacy.abstract;
+    } catch { /* abstract stays empty */ }
+  }
+  return result;
+}
 
 const str = (v) => (v == null ? "" : String(v));
 const live = (r) => r && !r.deletedAt;
@@ -231,6 +249,13 @@ export async function ownerRead(ctx) {
         ...item,
         images: await Promise.all((item.images || []).map(async (img) => ({ ...img, src: await withMedia(owner, img.src) }))),
       }))));
+    }
+    case "/api/metadata": {
+      try {
+        return ok(await metadataFor(query.get("query") || "", ctx.fetch));
+      } catch (err) {
+        return { status: err.status || 502, body: { detail: err.message || "Lookup failed." } };
+      }
     }
     case "/api/citations/graph": {
       const scope = ["all", "mine", "library"].includes(query.get("scope")) ? query.get("scope") : "all";

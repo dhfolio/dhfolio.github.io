@@ -15,6 +15,7 @@ import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { decodeDataImage } from './lib/publicize.mjs';
+import { encodeStem, toJson } from '../js/localapi/shared/dataset.js';
 
 export const SCHEMA = 1;
 export const DIRS = ['papers', 'references', 'manual-links', 'talks', 'recognitions', 'news', 'tags', 'profile-tags', 'media'];
@@ -25,15 +26,10 @@ export const DIRS = ['papers', 'references', 'manual-links', 'talks', 'recogniti
  * be too long, or is "." / "..", falls back to a hash.
  */
 export function fileStem(id) {
-  const s = String(id);
-  const encoded = [...new TextEncoder().encode(s)]
-    .map((b) => (/[A-Za-z0-9._-]/.test(String.fromCharCode(b)) && b < 128 ? String.fromCharCode(b) : `%${b.toString(16).toUpperCase().padStart(2, '0')}`))
-    .join('');
-  if (encoded && encoded.length <= 150 && encoded !== '.' && encoded !== '..') return encoded;
-  return `x-${createHash('sha1').update(s).digest('hex').slice(0, 16)}`;
+  return encodeStem(id) ?? `x-${createHash('sha1').update(String(id)).digest('hex').slice(0, 16)}`;
 }
 
-export const toJson = (value) => `${JSON.stringify(value, null, 1)}\n`;
+export { toJson };
 
 /** Turn every inline data:image/ URL in `value` (recursively) into "media/<name>". */
 function extractMedia(value, media) {

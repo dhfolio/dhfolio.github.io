@@ -10,8 +10,9 @@
  * (owner/session.js): owner GETs are answered from the private dataset.
  */
 
-import { publicRoutes } from "./routes-public.js?v=1.0.2";
-import { ownerRead } from "./owner/routes-read.js?v=1.0.2";
+import { publicRoutes } from "./routes-public.js?v=1.0.3";
+import { ownerRead } from "./owner/routes-read.js?v=1.0.3";
+import { ownerWrite } from "./owner/routes-write.js?v=1.0.3";
 
 const routes = [...publicRoutes];
 
@@ -21,11 +22,15 @@ const STATUS = { auth: 401, perm: 403, notfound: 404, ratelimit: 429, conflict: 
 export async function handle({ method, path, body, ownerSlug, fetch, owner }) {
   try {
     const url = new URL(path, "http://local");
-    const ctx = { method, pathname: url.pathname, query: url.searchParams, body, ownerSlug, fetch, owner };
+    const ctx = { method, pathname: url.pathname, query: url.searchParams, body, ownerSlug, fetch, owner, editor: owner?.editor };
     if (owner) {
-      const result = await ownerRead(ctx);
+      const result = (await ownerRead(ctx)) || (await ownerWrite(ctx));
       if (result) return result;
-      if (method !== "GET") return { status: 423, body: { detail: "Editing is not switched on yet; the site is read-only for now." } };
+      if (method === "PUT" && url.pathname === "/api/state") {
+        // The original replaced every record (state_repository.py:27-91); never here.
+        return { status: 405, body: { detail: "Saving the whole library at once is not supported." } };
+      }
+      if (method !== "GET") return { status: 501, body: { detail: "Not available on this site yet." } };
     }
     for (const route of routes) {
       const result = await route(ctx);

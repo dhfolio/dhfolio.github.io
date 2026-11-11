@@ -11,8 +11,8 @@
  *   POST /api/citations/refresh   { scope, limit }
  */
 
-import { apiJson, postJson } from "../api.js?v=1.0.2";
-import { navigateToPaper } from "../router.js?v=1.0.2";
+import { apiJson, postJson } from "../api.js?v=1.0.3";
+import { navigateToPaper } from "../router.js?v=1.0.3";
 
 let scope = "all";
 // Non-empty when viewing another user's map at /<slug>/maps — switches data

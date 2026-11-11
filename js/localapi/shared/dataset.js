@@ -24,6 +24,32 @@ export function collectionOf(path) {
   return COLLECTIONS[m[1]] ? m[1] : null;
 }
 
+/** Record files: indent 1, trailing newline (stable diffs; same as tools/import-legacy.mjs). */
+export const toJson = (value) => `${JSON.stringify(value, null, 1)}\n`;
+
+/**
+ * File stem for a record id. Characters outside [A-Za-z0-9._-] are written
+ * %XX (UTF-8): readable, reversible, legal on every OS. Ids that would still
+ * be unusable ("." / "..", over 150 chars) get "x-" + a hash, which only
+ * the import tool (Node, sync) computes; the editor never creates such ids.
+ */
+export function encodeStem(id) {
+  const s = String(id);
+  const encoded = [...new TextEncoder().encode(s)]
+    .map((b) => (b < 128 && /[A-Za-z0-9._-]/.test(String.fromCharCode(b)) ? String.fromCharCode(b) : `%${b.toString(16).toUpperCase().padStart(2, "0")}`))
+    .join("");
+  return encoded && encoded.length <= 150 && encoded !== "." && encoded !== ".." ? encoded : null;
+}
+
+/** Path of a record: the file it was loaded from, or a new one from its id. */
+export function recordPath(ds, dir, id) {
+  const known = ds.paths.get(`${dir}:${id}`);
+  if (known) return known;
+  const stem = encodeStem(id);
+  if (!stem) throw new Error(`id cannot be stored as a file name: ${String(id).slice(0, 40)}`);
+  return `${dir}/${stem}.json`;
+}
+
 export function isDatasetPath(path) {
   return path === "atlas.json" || path === "profile.json" || collectionOf(path) !== null;
 }
@@ -34,6 +60,47 @@ function parse(path, text) {
   } catch (err) {
     throw new Error(`${path}: ${err.message}`);
   }
+}
+
+/**
+ * Apply one file change to a loaded dataset in place: a local edit, a journal
+ * replay or a commit from another device. text === null deletes.
+ */
+export function applyFile(ds, path, text) {
+  if (path === "atlas.json") return;
+  if (path === "profile.json") {
+    if (text != null) ds.profile = parse(path, text);
+    return;
+  }
+  const dir = collectionOf(path);
+  if (!dir) return;
+  const keyOf = () => [...ds.paths].find(([, p]) => p === path)?.[0];
+  if (dir === "references") {
+    const old = keyOf();
+    if (old) {
+      delete ds.references[old.slice("references:".length)];
+      ds.paths.delete(old);
+    }
+    if (text == null) return;
+    const r = parse(path, text);
+    ds.references[r.paperId] = Array.isArray(r.rows) ? r.rows : [];
+    ds.paths.set(`references:${r.paperId}`, path);
+    return;
+  }
+  const list = ds[COLLECTIONS[dir]];
+  const old = keyOf();
+  if (old) {
+    const id = old.slice(dir.length + 1);
+    const i = list.findIndex((rec) => String(rec.id) === id);
+    if (i >= 0) list.splice(i, 1);
+    ds.paths.delete(old);
+  }
+  if (text == null) return;
+  const record = parse(path, text);
+  const j = list.findIndex((rec) => String(rec.id) === String(record.id));
+  if (j >= 0) list.splice(j, 1, record);
+  else list.push(record);
+  ds.paths.set(`${dir}:${record.id}`, path);
 }
 
 export function datasetFromFiles(files) {

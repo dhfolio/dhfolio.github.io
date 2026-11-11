@@ -1,14 +1,17 @@
 /**
  * js/localapi/owner/store.js
- * Loads the private dataset from GitHub: head → tree → only the blobs the
+ * The private dataset as of a commit: loads head → tree → only the blobs the
  * cache lacks (GraphQL in batches, REST for anything GraphQL did not return).
- * Blobs are cached by their sha, so a reload after an edit elsewhere fetches
- * just the changed records. Images are fetched on first use.
+ * Blobs are cached by sha, so a reload after an edit elsewhere fetches just
+ * the changed records. Images are fetched on first use.
+ *
+ * The dataset object is live: the editor applies local edits to it, and
+ * applyRemote() folds in commits made on another device.
  * DOM-free: `gh` (github.js), `cache` ({get,set}) and `onProgress` are injected.
  */
 
-import { datasetFromFiles, isDatasetPath } from "../shared/dataset.js?v=1.0.2";
-import { bytesToBase64 } from "./github.js?v=1.0.2";
+import { applyFile, datasetFromFiles, isDatasetPath } from "../shared/dataset.js?v=1.0.3";
+import { bytesToBase64 } from "./github.js?v=1.0.3";
 
 const BATCH = 100;
 const REST_CONCURRENCY = 6;
@@ -18,9 +21,9 @@ const decoder = new TextDecoder();
 
 export function createStore({ gh, cache, onProgress = () => {}, branch = "main" }) {
   let loading = null;
-  let snapshot = null; // { commit, tree: Map<path, sha>, dataset }
+  let snapshot = null; // { commit, treeSha, tree: Map<path, sha>, dataset }
 
-  async function textsFor(commit, wanted) {
+  async function textsFor(commit, wanted, report = true) {
     const out = new Map();
     const missing = [];
     for (const [path, sha] of wanted) {
@@ -30,7 +33,8 @@ export function createStore({ gh, cache, onProgress = () => {}, branch = "main" 
     }
     let done = out.size;
     const total = wanted.length;
-    onProgress({ done, total });
+    const progress = () => report && onProgress({ done, total });
+    progress();
     for (let i = 0; i < missing.length; i += BATCH) {
       const batch = missing.slice(i, i + BATCH);
       let texts = new Map();
@@ -44,7 +48,8 @@ export function createStore({ gh, cache, onProgress = () => {}, branch = "main" 
         if (!texts.has(path)) continue;
         out.set(path, texts.get(path));
         await cache.set(`t:${sha}`, texts.get(path));
-        onProgress({ done: ++done, total });
+        done++;
+        progress();
       }
     }
     const rest = missing.filter(([p]) => !out.has(p));
@@ -55,34 +60,70 @@ export function createStore({ gh, cache, onProgress = () => {}, branch = "main" 
         const text = decoder.decode(await gh.getBlobBytes(sha));
         out.set(path, text);
         await cache.set(`t:${sha}`, text);
-        onProgress({ done: ++done, total });
+        done++;
+        progress();
       }
     }));
     return out;
   }
 
+  async function treeOf(commit) {
+    const treeSha = (await gh.getCommit(commit)).tree;
+    return { treeSha, tree: await gh.getTree(treeSha) };
+  }
+
   async function load() {
     const commit = await gh.getHead(branch);
-    const tree = await gh.getTree((await gh.getCommit(commit)).tree);
+    const { treeSha, tree } = await treeOf(commit);
     const wanted = [...tree].filter(([path]) => isDatasetPath(path));
     const files = await textsFor(commit, wanted);
-    snapshot = { commit, tree, dataset: datasetFromFiles(files) };
+    snapshot = { commit, treeSha, tree, dataset: datasetFromFiles(files) };
     return snapshot;
   }
 
-  return {
-    /** The dataset of the branch head, loaded once per page. */
+  const store = {
+    branch,
+    gh,
+    /** The live dataset (head at load time plus everything applied since). */
     async dataset() {
       if (!loading) loading = load().catch((err) => { loading = null; throw err; });
       return (await loading).dataset;
     },
     async snapshot() {
-      await this.dataset();
+      await store.dataset();
       return snapshot;
+    },
+    /** After our own commit landed: the dataset already holds those edits. */
+    setBase({ commit, treeSha, tree }) {
+      Object.assign(snapshot, { commit, treeSha, tree });
+    },
+    /**
+     * Fold a newer commit made elsewhere into the dataset. `except` paths are
+     * left alone (local edits that will be committed on top). Returns the
+     * dataset paths that changed remotely.
+     */
+    async applyRemote(commit, except = new Set()) {
+      const { treeSha, tree } = await treeOf(commit);
+      const changed = [];
+      for (const path of new Set([...snapshot.tree.keys(), ...tree.keys()])) {
+        if (snapshot.tree.get(path) !== tree.get(path)) changed.push(path);
+      }
+      const data = changed.filter((p) => isDatasetPath(p) && !except.has(p));
+      const present = data.filter((p) => tree.has(p)).map((p) => [p, tree.get(p)]);
+      const texts = await textsFor(commit, present, false);
+      for (const p of data) applyFile(snapshot.dataset, p, tree.has(p) ? texts.get(p) : null);
+      Object.assign(snapshot, { commit, treeSha, tree });
+      return changed;
+    },
+    /** Put the snapshot's version of these files back into the dataset (conflict → "theirs"). */
+    async reloadPaths(present, gone = []) {
+      const texts = await textsFor(snapshot.commit, present.map((p) => [p, snapshot.tree.get(p)]), false);
+      for (const p of present) applyFile(snapshot.dataset, p, texts.get(p));
+      for (const p of gone) applyFile(snapshot.dataset, p, null);
     },
     /** "media/x.jpg" → data: URL (cached by blob sha). */
     async mediaDataUrl(path) {
-      const snap = await this.snapshot();
+      const snap = await store.snapshot();
       const sha = snap.tree.get(path);
       const ext = path.split(".").pop();
       if (!sha || !MIME[ext]) return "";
@@ -94,6 +135,7 @@ export function createStore({ gh, cache, onProgress = () => {}, branch = "main" 
       return url;
     },
   };
+  return store;
 }
 
 /** In-memory cache (tests, and the browser when IndexedDB is unavailable). */
