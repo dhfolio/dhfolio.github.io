@@ -289,6 +289,22 @@
    "correspondingRole": "none"
   },
   {
+   "id": "p:1c330d8e-e4d0-4a7b-a10f-e2bb9775de0c",
+   "doi": "10.1021/acs.nanolett.6c02293",
+   "title": "https://pubs.acs.org/nalefd/article/doi/10.1021/acs.nanolett.6c02293/5470899/Ferroelectric-Polarization-Dynamics-of-HZO-FeCAPs",
+   "year": "",
+   "authors": "",
+   "journal": "",
+   "isMine": false,
+   "inLibrary": true,
+   "kind": "seed",
+   "type": "paper",
+   "referenceCount": 0,
+   "authorOrder": null,
+   "isCoFirst": false,
+   "correspondingRole": "none"
+  },
+  {
    "id": "p:1e826a08-cff8-41bd-8fa0-468ce75cfaa4",
    "doi": "10.48550/arxiv.2604.15131",
    "title": "Fully Atomic-Layer-Deposited Vertical Complementary FeRAM with Ultra-High 2Pr &gt; 100 uC/cm2 and High Endurance &gt; 1E10 cycles",
