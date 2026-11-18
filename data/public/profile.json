@@ -3756,7 +3756,9 @@
   "showAllPubs": true,
   "sortMode": "year",
   "showNumbering": "global",
-  "positionFilters": []
+  "positionFilters": [
+   "main"
+  ]
  },
  "isPrivate": false
 }
