@@ -1441,6 +1441,22 @@
    "correspondingRole": "none"
   },
   {
+   "id": "p:87b9c9af-103b-4f26-9fdb-0026235aebdb",
+   "doi": "10.48550/arxiv.2611.17670",
+   "title": "Crystal Structure Prediction from Search to Learning: A 30-Year Expedition",
+   "year": "2026",
+   "authors": "Jianjun Hu, Ying Feng",
+   "journal": "arXiv",
+   "isMine": false,
+   "inLibrary": true,
+   "kind": "seed",
+   "type": "review",
+   "referenceCount": 0,
+   "authorOrder": null,
+   "isCoFirst": false,
+   "correspondingRole": "none"
+  },
+  {
    "id": "p:8ab9a318-f994-4f20-8947-cbcdeaeff8ea",
    "doi": "10.1109/led.2026.3699506",
    "title": "Thermal Processing Limits in Oxide-Channel Ferroelectric Field Effect Transistors",
